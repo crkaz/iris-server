@@ -14,7 +14,7 @@ namespace iris_server.Middleware
             _next = next;
         }
 
-        public async Task InvokeAsync(HttpContext context, UserContext dbContext)
+        public async Task InvokeAsync(HttpContext context, DatabaseContext dbContext)
         {
             //const string apiKeyHeader = "ApiKey";
             //string apiKey = string.Empty;

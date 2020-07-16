@@ -8,28 +8,18 @@ namespace iris_server.Models
 {
     public class User
     {
-        public enum UserRole { Admin, User };
-
+        public enum UserRole { Admin, FormalCarer, InformalCarer, Patient };
 
         // DB fields.
         [Key] // Make primary key via EF convention.
         public string ApiKey { get; set; } // Primary key.
-        public string UserId{ get; set; }
-        public string Role { get; set; }
-        public virtual ICollection<Log> Logs { get; set; }
-        public virtual ICollection<ActivityLog> ActivityLogs { get; set; }
-        public virtual ICollection<CalendarEntry> CalendarEntries { get; set; }
-        public virtual ICollection<StickyNote> Stickies { get; set; }
-        public virtual ICollection<PatientMessage> Messages { get; set; }
+        public UserRole Role { get; set; }
+        public virtual ICollection<DbLog> DbLogs { get; set; }
         [Timestamp] // Enable optimistic concurrency measures by timestamping transactions (EF convention).
         public byte[] RowVersion { get; set; }
 
         public User() { }
     }
-
-    #region Task13?
-    // TODO: You may find it useful to add code here for Logging
-    #endregion
 
     public static class UserDatabaseAccess
     {

@@ -10,7 +10,7 @@ namespace iris_server.Controllers
     public class PatientStickiesController : BaseController
     {
         /// Constructor injects the user context using dependency injection, via the BaseController. 
-        public PatientStickiesController(Models.UserContext context) : base(context) { }
+        public PatientStickiesController(Models.DatabaseContext context) : base(context) { }
 
 
         // Get the json serialised sticky notes for a patient.

@@ -41,7 +41,7 @@ namespace iris_server
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             // Initialise usercontext for dependency injection via BaseController.
-            services.AddDbContext<Models.UserContext>();
+            services.AddDbContext<Models.DatabaseContext>();
 
             services.AddMvc(options =>
             {

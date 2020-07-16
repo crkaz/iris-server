@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace iris_server.Models
 {
-    public class Log
+    public class DbLog
     {
         // DB fields.
         [Key] // Make primary key.
-        public string LogId { get; set; } // Primary key.
-        public string LogString { get; set; }
-        public DateTime LogDateTime { get; set; }
+        public string Id { get; set; } // Primary key.
+        public string What { get; set; }
+        public DateTime When { get; set; }
         [Timestamp]
         public byte[] RowVersion { get; set; }
     }

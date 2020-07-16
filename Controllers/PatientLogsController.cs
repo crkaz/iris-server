@@ -10,7 +10,7 @@ namespace iris_server.Controllers
     public class PatientLogsController : BaseController
     {
         /// Constructor injects the user context using dependency injection, via the BaseController. 
-        public PatientLogsController(Models.UserContext context) : base(context) { }
+        public PatientLogsController(Models.DatabaseContext context) : base(context) { }
 
 
         // Get the paginated logs of a patient.

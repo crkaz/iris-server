@@ -10,7 +10,7 @@ namespace iris_server.Controllers
     public class PatientController : BaseController
     {
         /// Constructor injects the user context using dependency injection, via the BaseController. 
-        public PatientController(Models.UserContext context) : base(context) { }
+        public PatientController(Models.DatabaseContext context) : base(context) { }
 
 
         // Delete a user from the system, given their id.

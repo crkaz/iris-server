@@ -10,7 +10,7 @@ namespace iris_server.Controllers
     public class CarerController : BaseController
     {
         /// Constructor injects the user context using dependency injection, via the BaseController. 
-        public CarerController(Models.UserContext context) : base(context) { }
+        public CarerController(Models.DatabaseContext context) : base(context) { }
 
 
         // Create a new user in the system.

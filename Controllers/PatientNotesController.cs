@@ -10,7 +10,7 @@ namespace iris_server.Controllers
     public class PatientNotesController : BaseController
     {
         /// Constructor injects the user context using dependency injection, via the BaseController. 
-        public PatientNotesController(Models.UserContext context) : base(context) { }
+        public PatientNotesController(Models.DatabaseContext context) : base(context) { }
 
 
         // Edit a patient's 'notes' field'.

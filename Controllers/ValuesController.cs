@@ -14,7 +14,7 @@ namespace iris_server.Controllers
     public class ValuesController : BaseController
     {
         /// Constructor injects the user context using dependency injection, via the BaseController. 
-        public ValuesController(Models.UserContext context) : base(context) { }
+        public ValuesController(Models.DatabaseContext context) : base(context) { }
 
         // GET api/values
         [HttpGet]

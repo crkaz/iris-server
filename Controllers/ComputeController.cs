@@ -11,7 +11,7 @@ namespace iris_server.Controllers
     public class ComputeController : BaseController
     {
         /// Constructor injects the user context using dependency injection, via the BaseController. 
-        public ComputeController(Models.UserContext context) : base(context) { }
+        public ComputeController(Models.DatabaseContext context) : base(context) { }
 
         // Analyse an image and return the predicted room and context aware prompt.
         // ..api/feature/detectroom

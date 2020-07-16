@@ -11,9 +11,9 @@ namespace iris_server.Controllers
     [ApiController]
     public abstract class BaseController : ControllerBase
     {
-        protected readonly UserContext _context;
+        protected readonly DatabaseContext _context;
 
-        public BaseController(UserContext context)
+        public BaseController(DatabaseContext context)
         {
             _context = context;
         }

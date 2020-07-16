@@ -10,7 +10,7 @@ namespace iris_server.Controllers
     public class PatientMessagesController : BaseController
     {
         /// Constructor injects the user context using dependency injection, via the BaseController. 
-        public PatientMessagesController(Models.UserContext context) : base(context) { }
+        public PatientMessagesController(Models.DatabaseContext context) : base(context) { }
 
 
         // Add a message to the patients 'notes' field'.

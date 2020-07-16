@@ -9,6 +9,6 @@ namespace iris_server.Controllers
     public class AdminController : BaseController
     {
         /// Constructor injects the user context using dependency injection, via the BaseController. 
-        public AdminController(Models.UserContext context) : base(context) { }
+        public AdminController(Models.DatabaseContext context) : base(context) { }
     }
 }
