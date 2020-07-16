@@ -12,7 +12,7 @@ namespace iris_server.Migrations
                 columns: table => new
                 {
                     ApiKey = table.Column<string>(nullable: false),
-                    Role = table.Column<int>(nullable: false),
+                    Role = table.Column<string>(nullable: true),
                     RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true)
                 },
                 constraints: table =>
@@ -24,13 +24,13 @@ namespace iris_server.Migrations
                 name: "Carers",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Email = table.Column<string>(nullable: false),
                     UserApiKey = table.Column<string>(nullable: true),
-                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true)
+                    AssignedPatientIds = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Carers", x => x.Id);
+                    table.PrimaryKey("PK_Carers", x => x.Email);
                     table.ForeignKey(
                         name: "FK_Carers_Users_UserApiKey",
                         column: x => x.UserApiKey,
@@ -66,20 +66,13 @@ namespace iris_server.Migrations
                 {
                     Id = table.Column<string>(nullable: false),
                     UserApiKey = table.Column<string>(nullable: true),
+                    Status = table.Column<string>(nullable: true),
                     JsonPatientInfo = table.Column<string>(nullable: true),
-                    JsonConfig = table.Column<string>(nullable: true),
-                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
-                    CarerId = table.Column<string>(nullable: true)
+                    JsonConfig = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Patients", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Patients_Carers_CarerId",
-                        column: x => x.CarerId,
-                        principalTable: "Carers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Patients_Users_UserApiKey",
                         column: x => x.UserApiKey,
@@ -95,6 +88,7 @@ namespace iris_server.Migrations
                     Id = table.Column<string>(nullable: false),
                     DateTime = table.Column<DateTime>(nullable: false),
                     Caption = table.Column<string>(nullable: true),
+                    Location = table.Column<string>(nullable: true),
                     JsonDescription = table.Column<string>(nullable: true),
                     PatientId = table.Column<string>(nullable: true)
                 },
@@ -114,24 +108,18 @@ namespace iris_server.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(nullable: false),
+                    CarerId = table.Column<string>(nullable: true),
                     Start = table.Column<DateTime>(nullable: false),
                     End = table.Column<DateTime>(nullable: false),
                     Repeat = table.Column<int>(nullable: false),
                     Description = table.Column<string>(nullable: true),
                     JsonReminders = table.Column<string>(nullable: true),
                     RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
-                    CarerId = table.Column<string>(nullable: true),
                     PatientId = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Calendars", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Calendars_Carers_CarerId",
-                        column: x => x.CarerId,
-                        principalTable: "Carers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Calendars_Patients_PatientId",
                         column: x => x.PatientId,
@@ -145,22 +133,16 @@ namespace iris_server.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(nullable: false),
+                    CarerId = table.Column<string>(nullable: true),
                     Sent = table.Column<DateTime>(nullable: false),
                     Read = table.Column<DateTime>(nullable: true),
                     Title = table.Column<string>(nullable: true),
                     Message = table.Column<string>(nullable: true),
-                    CarerId = table.Column<string>(nullable: true),
                     PatientId = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Messages", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Messages_Carers_CarerId",
-                        column: x => x.CarerId,
-                        principalTable: "Carers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Messages_Patients_PatientId",
                         column: x => x.PatientId,
@@ -195,11 +177,6 @@ namespace iris_server.Migrations
                 column: "PatientId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Calendars_CarerId",
-                table: "Calendars",
-                column: "CarerId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Calendars_PatientId",
                 table: "Calendars",
                 column: "PatientId");
@@ -215,19 +192,9 @@ namespace iris_server.Migrations
                 column: "UserApiKey");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Messages_CarerId",
-                table: "Messages",
-                column: "CarerId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Messages_PatientId",
                 table: "Messages",
                 column: "PatientId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Patients_CarerId",
-                table: "Patients",
-                column: "CarerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Patients_UserApiKey",
@@ -249,6 +216,9 @@ namespace iris_server.Migrations
                 name: "Calendars");
 
             migrationBuilder.DropTable(
+                name: "Carers");
+
+            migrationBuilder.DropTable(
                 name: "DbLogs");
 
             migrationBuilder.DropTable(
@@ -259,9 +229,6 @@ namespace iris_server.Migrations
 
             migrationBuilder.DropTable(
                 name: "Patients");
-
-            migrationBuilder.DropTable(
-                name: "Carers");
 
             migrationBuilder.DropTable(
                 name: "Users");

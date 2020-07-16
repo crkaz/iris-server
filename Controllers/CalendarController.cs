@@ -4,13 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using iris_server.Models;
 
 namespace iris_server.Controllers
 {
-    public class PatientCalendarController : BaseController
+    public class CalendarController : BaseController
     {
         /// Constructor injects the user context using dependency injection, via the BaseController. 
-        public PatientCalendarController(Models.DatabaseContext context) : base(context) { }
+        public CalendarController(DatabaseContext context) : base(context) { }
 
 
         // Add a new calender entry to the patient's calendar.
@@ -18,7 +19,7 @@ namespace iris_server.Controllers
         [HttpPost]
         [ActionName("calendar")]
         // [Authorize(Roles = "Admin,Carer")]
-        public IActionResult CalendarPost([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromBody] string calendarEntry)
+        public IActionResult CalendarPost([FromQuery(Name = "id")] string id, [FromBody] string calendarEntry)
         {
             return Ok("Endpoint works.");
         }
@@ -29,7 +30,7 @@ namespace iris_server.Controllers
         [HttpPut]
         [ActionName("calendar")]
         // [Authorize(Roles = "Admin,Carer")]
-        public IActionResult CalendarPut([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromBody] string calendarEntry)
+        public IActionResult CalendarPut([FromQuery(Name = "id")] string id, [FromBody] string calendarEntry)
         {
             return Ok("Endpoint works.");
         }
@@ -40,7 +41,7 @@ namespace iris_server.Controllers
         [HttpDelete]
         [ActionName("calendar")]
         // [Authorize(Roles = "Admin,Carer")]
-        public IActionResult CalendarDelete([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
+        public IActionResult CalendarDelete([FromQuery(Name = "id")] string id)
         {
             return Ok("Endpoint works.");
         }
@@ -51,7 +52,7 @@ namespace iris_server.Controllers
         [HttpGet]
         [ActionName("calendar")]
         // [Authorize(Roles = "Admin,Carer,Patient")]
-        public IActionResult CalendarGet([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromQuery(Name = "date")] string date)
+        public IActionResult CalendarGet([FromQuery(Name = "id")] string id, [FromQuery(Name = "date")] string date)
         {
             return Ok("Endpoint works.");
         }

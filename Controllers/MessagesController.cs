@@ -4,13 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using iris_server.Models;
 
 namespace iris_server.Controllers
 {
-    public class PatientMessagesController : BaseController
+    public class MessagesController : BaseController
     {
         /// Constructor injects the user context using dependency injection, via the BaseController. 
-        public PatientMessagesController(Models.DatabaseContext context) : base(context) { }
+        public MessagesController(DatabaseContext context) : base(context) { }
 
 
         // Add a message to the patients 'notes' field'.
@@ -18,7 +19,7 @@ namespace iris_server.Controllers
         [HttpPost]
         [ActionName("messages")]
         // [Authorize(Roles = "Admin,Carer")]
-        public IActionResult MessagesPost([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromBody] string titleAndMessage)
+        public IActionResult MessagesPost([FromQuery(Name = "id")] string id, [FromBody] string titleAndMessage)
         {
             return Ok("Endpoint works.");
         }
@@ -29,7 +30,7 @@ namespace iris_server.Controllers
         [HttpGet]
         [ActionName("messages")]
         // [Authorize(Roles = "Admin,Carer,Patient")]
-        public IActionResult MessagesGet([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
+        public IActionResult MessagesGet([FromQuery(Name = "id")] string id)
         {
             return Ok("Endpoint works.");
         }

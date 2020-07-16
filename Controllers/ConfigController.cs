@@ -4,13 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using iris_server.Models;
 
 namespace iris_server.Controllers
 {
-    public class PatientConfigController : BaseController
+    public class ConfigController : BaseController
     {
         /// Constructor injects the user context using dependency injection, via the BaseController. 
-        public PatientConfigController(Models.DatabaseContext context) : base(context) { }
+        public ConfigController(DatabaseContext context) : base(context) { }
 
 
         // Modify a parameter of the patient's device configuration.
@@ -18,7 +19,7 @@ namespace iris_server.Controllers
         [HttpPut]
         [ActionName("config")]
         // [Authorize(Roles = "Admin,Carer")]
-        public IActionResult ConfigPut([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromBody] string optionAndValue)
+        public IActionResult ConfigPut([FromQuery(Name = "id")] string id, [FromBody] string optionAndValue)
         {
             return Ok("Endpoint works.");
         }
@@ -29,7 +30,7 @@ namespace iris_server.Controllers
         [HttpGet]
         [ActionName("config")]
         // [Authorize(Roles = "Admin,Carer")]
-        public IActionResult ConfigGet([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
+        public IActionResult ConfigGet([FromQuery(Name = "id")] string id)
         {
             return Ok("Endpoint works.");
         }

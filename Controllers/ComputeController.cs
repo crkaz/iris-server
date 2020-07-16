@@ -5,13 +5,14 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using iris_server.Extensions;
 using iris_server.Services;
+using iris_server.Models;
 
 namespace iris_server.Controllers
 {
     public class ComputeController : BaseController
     {
         /// Constructor injects the user context using dependency injection, via the BaseController. 
-        public ComputeController(Models.DatabaseContext context) : base(context) { }
+        public ComputeController(DatabaseContext context) : base(context) { }
 
         // Analyse an image and return the predicted room and context aware prompt.
         // ..api/feature/detectroom
@@ -39,7 +40,7 @@ namespace iris_server.Controllers
         // ..api/feature/detectfall
         [HttpGet]
         // [Authorize(Roles = "Patient")]
-        public bool DetectFall([FromHeader(Name = "ApiKey")] string apiKey, [FromBody] string transforms)
+        public bool DetectFall([FromBody] string transforms)
         {
             return DetectionService.DetectFall(transforms);
         }

@@ -13,6 +13,7 @@ namespace iris_server.Models
         public string Id { get; set; } // Primary key.
         public DateTime DateTime { get; set; }
         public string Caption{ get; set; }
+        public string Location{ get; set; }
         public string JsonDescription { get; set; }
 
         public ActivityLog() { }

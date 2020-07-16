@@ -18,15 +18,34 @@ namespace XUnitTests.Utils
         // Constructor
         public TestClient(string host = HOST)
         {
-            /// Initialise a new HTTP connection to a host URI.
-            Client.BaseAddress = new Uri(host);
+            Init(host);
         }
 
+        private void Init(string host)
+        {
+            /// Initialise a new HTTP connection to a host URI.
+            Client.BaseAddress = new Uri(host);
+
+            // Attempt to connect to the host via the status controller.
+            try
+            {
+                string endpoint = Client.BaseAddress + "status";
+                var worker = Client.GetAsync(endpoint);
+                var response = worker.GetAwaiter().GetResult();
+                worker.Wait();
+            }
+            catch (HttpRequestException e)
+            {
+                // Host unavailable.
+                throw new Exception("Connection refused. Please check that the host is online before running the tests.");
+            }
+        }
 
         // GET
         public async Task<HttpResponseMessage> GetRequest(string endpoint, Dictionary<string, string> headers = null)
         {
             AddHeaders(headers);
+            endpoint = Client.BaseAddress + endpoint;
             HttpResponseMessage response = await Client.GetAsync(endpoint);
             return response;
         }
@@ -58,8 +77,14 @@ namespace XUnitTests.Utils
             return response;
         }
 
-
+        //
         // Utility functions.
+        //
+
+        /// <summary>
+        /// Add a collection of headers to the request.
+        /// </summary>
+        /// <param name="headers"></param>
         private void AddHeaders(Dictionary<string, string> headers)
         {
             if (headers != null)
@@ -78,6 +103,23 @@ namespace XUnitTests.Utils
                     Client.DefaultRequestHeaders.Add(key, value);
                 }
             }
+        }
+
+        /// <summary>
+        /// Add an individual header to the request.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        public void AddHeader(string key, string value)
+        {
+            bool keyInHeader = Client.DefaultRequestHeaders.Contains(key);
+
+            if (keyInHeader)
+            {
+                Client.DefaultRequestHeaders.Remove(key);
+            }
+
+            Client.DefaultRequestHeaders.Add(key, value);
         }
     }
 }

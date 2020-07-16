@@ -4,13 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using iris_server.Models;
 
 namespace iris_server.Controllers
 {
-    public class PatientStickiesController : BaseController
+    public class StickiesController : BaseController
     {
         /// Constructor injects the user context using dependency injection, via the BaseController. 
-        public PatientStickiesController(Models.DatabaseContext context) : base(context) { }
+        public StickiesController(DatabaseContext context) : base(context) { }
 
 
         // Get the json serialised sticky notes for a patient.
@@ -18,7 +19,7 @@ namespace iris_server.Controllers
         [HttpGet]
         [ActionName("stickies")]
         // [Authorize(Roles = "Admin,Carer,Patient")]
-        public IActionResult StickiesGet([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
+        public IActionResult StickiesGet([FromQuery(Name = "id")] string id)
         {
             return Ok("Endpoint works.");
         }
@@ -29,7 +30,7 @@ namespace iris_server.Controllers
         [HttpGet]
         [ActionName("stickies")]
         // [Authorize(Roles = "Patient")]
-        public IActionResult StickiesPost([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
+        public IActionResult StickiesPost([FromQuery(Name = "id")] string id)
         {
             return Ok("Endpoint works.");
         }

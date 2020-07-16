@@ -15,5 +15,13 @@ namespace iris_server.Models
         public DateTime When { get; set; }
         [Timestamp]
         public byte[] RowVersion { get; set; }
+
+        public DbLog() { }
+
+        public DbLog(string pWhat)
+        {
+            this.What = pWhat;
+            this.When = DateTime.Now;
+        }
     }
 }

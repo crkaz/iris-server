@@ -10,7 +10,7 @@ using iris_server.Models;
 namespace iris_server.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20200715235751_m0")]
+    [Migration("20200716204457_m0")]
     partial class m0
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,6 +31,8 @@ namespace iris_server.Migrations
                     b.Property<DateTime>("DateTime");
 
                     b.Property<string>("JsonDescription");
+
+                    b.Property<string>("Location");
 
                     b.Property<string>("PatientId");
 
@@ -66,8 +68,6 @@ namespace iris_server.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CarerId");
-
                     b.HasIndex("PatientId");
 
                     b.ToTable("Calendars");
@@ -75,16 +75,14 @@ namespace iris_server.Migrations
 
             modelBuilder.Entity("iris_server.Models.Carer", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<string>("Email")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate();
+                    b.Property<string>("AssignedPatientIds");
 
                     b.Property<string>("UserApiKey");
 
-                    b.HasKey("Id");
+                    b.HasKey("Email");
 
                     b.HasIndex("UserApiKey");
 
@@ -118,21 +116,15 @@ namespace iris_server.Migrations
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("CarerId");
-
                     b.Property<string>("JsonConfig");
 
                     b.Property<string>("JsonPatientInfo");
 
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate();
+                    b.Property<string>("Status");
 
                     b.Property<string>("UserApiKey");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CarerId");
 
                     b.HasIndex("UserApiKey");
 
@@ -157,8 +149,6 @@ namespace iris_server.Migrations
                     b.Property<string>("Title");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CarerId");
 
                     b.HasIndex("PatientId");
 
@@ -188,7 +178,7 @@ namespace iris_server.Migrations
                     b.Property<string>("ApiKey")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<int>("Role");
+                    b.Property<string>("Role");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -208,10 +198,6 @@ namespace iris_server.Migrations
 
             modelBuilder.Entity("iris_server.Models.CalendarEntry", b =>
                 {
-                    b.HasOne("iris_server.Models.Carer")
-                        .WithMany("CreatedAppointments")
-                        .HasForeignKey("CarerId");
-
                     b.HasOne("iris_server.Models.Patient")
                         .WithMany("CalendarEntries")
                         .HasForeignKey("PatientId");
@@ -233,10 +219,6 @@ namespace iris_server.Migrations
 
             modelBuilder.Entity("iris_server.Models.Patient", b =>
                 {
-                    b.HasOne("iris_server.Models.Carer")
-                        .WithMany("AssignedPatients")
-                        .HasForeignKey("CarerId");
-
                     b.HasOne("iris_server.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserApiKey");
@@ -244,10 +226,6 @@ namespace iris_server.Migrations
 
             modelBuilder.Entity("iris_server.Models.PatientMessage", b =>
                 {
-                    b.HasOne("iris_server.Models.Carer")
-                        .WithMany("SentMessages")
-                        .HasForeignKey("CarerId");
-
                     b.HasOne("iris_server.Models.Patient")
                         .WithMany("Messages")
                         .HasForeignKey("PatientId");

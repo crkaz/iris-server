@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System;
 
 namespace iris_server.Models
 {
@@ -22,6 +23,18 @@ namespace iris_server.Models
             optionsBuilder.UseLazyLoadingProxies(); // Enable lazy loading.
             optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=iris-db;");
             base.OnConfiguring(optionsBuilder);
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            var converter = new ValueConverter<string[], string>(
+                v => v.ToString(),
+                v => v.Split(',', StringSplitOptions.None));
+
+            modelBuilder
+                .Entity<Carer>()
+                .Property(e => e.AssignedPatientIds)
+                .HasConversion(converter);
         }
     }
 }

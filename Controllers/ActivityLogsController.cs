@@ -4,13 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using iris_server.Models;
 
 namespace iris_server.Controllers
 {
-    public class PatientLogsController : BaseController
+    public class ActivityLogsController : BaseController
     {
         /// Constructor injects the user context using dependency injection, via the BaseController. 
-        public PatientLogsController(Models.DatabaseContext context) : base(context) { }
+        public ActivityLogsController(DatabaseContext context) : base(context) { }
 
 
         // Get the paginated logs of a patient.
@@ -18,7 +19,7 @@ namespace iris_server.Controllers
         [HttpGet]
         [ActionName("logs")]
         // [Authorize(Roles = "Admin,Carer")]
-        public IActionResult LogsGet([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromQuery(Name = "page")] string page, [FromQuery(Name = "nitems")] string nItems)
+        public IActionResult LogsGet([FromQuery(Name = "id")] string id, [FromQuery(Name = "page")] string page, [FromQuery(Name = "nitems")] string nItems)
         {
             return Ok("Endpoint works.");
         }
@@ -29,7 +30,7 @@ namespace iris_server.Controllers
         [HttpPost]
         [ActionName("logs")]
         // [Authorize(Roles = "Patient")]
-        public IActionResult LogsPost([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromBody] string logEntry)
+        public IActionResult LogsPost([FromQuery(Name = "id")] string id, [FromBody] string logEntry)
         {
             return Ok("Endpoint works.");
         }

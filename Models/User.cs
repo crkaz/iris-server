@@ -8,12 +8,12 @@ namespace iris_server.Models
 {
     public class User
     {
-        public enum UserRole { Admin, FormalCarer, InformalCarer, Patient };
+        public enum UserRole { admin, formalcarer, informalcarer, patient };
 
         // DB fields.
         [Key] // Make primary key via EF convention.
         public string ApiKey { get; set; } // Primary key.
-        public UserRole Role { get; set; }
+        public string Role { get; set; }
         public virtual ICollection<DbLog> DbLogs { get; set; }
         [Timestamp] // Enable optimistic concurrency measures by timestamping transactions (EF convention).
         public byte[] RowVersion { get; set; }
@@ -23,14 +23,10 @@ namespace iris_server.Models
 
     public static class UserDatabaseAccess
     {
-        //#region Task3 
-        //// TODO: Make methods which allow us to read from/write to the database 
-        //#endregion
-
-        //// 1. Create a new user, using a username given as a parameter and creating a new GUID which is saved
-        //// as a string to the database as the ApiKey.This must return the ApiKey or the User object so that
-        //// the server can pass the Key back to the client.
-        //public static string CreateUser(UserContext ctx, string username)
+        // 1. Create a new user, using a username given as a parameter and creating a new GUID which is saved
+        // as a string to the database as the ApiKey.This must return the ApiKey or the User object so that
+        // the server can pass the Key back to the client.
+        //public static string CreateUser(DatabaseContext ctx, string username)
         //{
         //    try
         //    {
@@ -39,8 +35,6 @@ namespace iris_server.Models
 
         //        User user = new User() { ApiKey = apiKey, Role = userRole, UserName = username };
 
-        //        // FROM TASK 4:
-        //        // ...If this is the first user they should be saved as Admin role otherwise just with User role
         //        if (ctx.Users.Count() == 0)
         //        {
         //            user.Role = Enum.GetName(typeof(User.UserRole), User.UserRole.Admin);
@@ -57,26 +51,26 @@ namespace iris_server.Models
 
         //}
 
-        //// 2. Check if a user with a given ApiKey string exists in the database, returning true or false.
-        //public static bool LookupApiKey(UserContext ctx, string apiKey)
-        //{
-        //    try
-        //    {
-        //        User user = ctx.Users.Find(apiKey);
-        //        bool userExists = user != null;
-        //        return userExists;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Console.WriteLine("Unexpected error: " + e.Message);
-        //    }
+        // 2. Check if a user with a given ApiKey string exists in the database, returning true or false.
+        public static bool LookupApiKey(DatabaseContext ctx, string apiKey)
+        {
+            try
+            {
+                User user = ctx.Users.Find(apiKey);
+                bool userExists = user != null;
+                return userExists;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Unexpected error: " + e.Message);
+            }
 
-        //    return false;
-        //}
+            return false;
+        }
 
-        //// 3. Check if a user with a given ApiKey and UserName exists in the database, returning true or false.
-        ///// Could be combined with method 2.
-        //public static bool LookupUsernameAndApiKey(UserContext ctx, string apiKey, string username)
+        // 3. Check if a user with a given ApiKey and UserName exists in the database, returning true or false.
+        /// Could be combined with method 2.
+        //public static bool LookupUsernameAndApiKey(DatabaseContext ctx, string apiKey, string username)
         //{
         //    try
         //    {
@@ -96,24 +90,24 @@ namespace iris_server.Models
         //    return false;
         //}
 
-        //// 4. Check if a user with a given ApiKey string exists in the database, returning the User object.
-        //public static User GetUserByApiKey(UserContext ctx, string apiKey)
-        //{
-        //    try
-        //    {
-        //        User user = ctx.Users.Find(apiKey);
-        //        return user;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Console.WriteLine("Unexpected error: " + e.Message);
-        //    }
+        // 4. Check if a user with a given ApiKey string exists in the database, returning the User object.
+        public static User GetUserByApiKey(DatabaseContext ctx, string apiKey)
+        {
+            try
+            {
+                User user = ctx.Users.Find(apiKey);
+                return user;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Unexpected error: " + e.Message);
+            }
 
-        //    return null;
-        //}
+            return null;
+        }
 
         //// 5. Delete a user with a given ApiKey from the database.
-        //public static bool DeleteUserByApiKey(UserContext ctx, string apiKey)
+        //public static bool DeleteUserByApiKey(DatabaseContext ctx, string apiKey)
         //{
         //    bool success =
         //    AccessDbFacade(() =>
@@ -133,7 +127,7 @@ namespace iris_server.Models
 
         //// 6. Etc…
         //// This is only possible if usernames are unique but not sure how else can check from usercontroller given query in GET.
-        //public static bool CheckUsernameExists(UserContext ctx, string username)
+        //public static bool CheckUsernameExists(DatabaseContext ctx, string username)
         //{
         //    try
         //    {
@@ -153,7 +147,7 @@ namespace iris_server.Models
         //    return false;
         //}
 
-        //public static bool ChangeRole(UserContext ctx, string username, string role)
+        //public static bool ChangeRole(DatabaseContext ctx, string username, string role)
         //{
         //    bool success = AccessDbFacade(() =>
         //    {

@@ -17,28 +17,28 @@ namespace iris_server.Middleware
 
         public async Task InvokeAsync(HttpContext context, DatabaseContext dbContext)
         {
-            //const string apiKeyHeader = "ApiKey";
-            //string apiKey = string.Empty;
-            //if (context.Request.Headers.TryGetValue(apiKeyHeader, out var headerValues))
-            //{
-            //    apiKey = headerValues.FirstOrDefault(); // Extract from headerValues array.
-            //    bool keyExists = UserDatabaseAccess.LookupApiKey(dbContext, apiKey);
+            const string apiKeyHeader = "ApiKey";
+            string apiKey = string.Empty;
+            if (context.Request.Headers.TryGetValue(apiKeyHeader, out var headerValues))
+            {
+                apiKey = headerValues.FirstOrDefault(); // Extract from headerValues array.
+                bool keyExists = UserDatabaseAccess.LookupApiKey(dbContext, apiKey);
 
-            //    if (keyExists)
-            //    {
-            //        User user = UserDatabaseAccess.GetUserByApiKey(dbContext, apiKey);
+                if (keyExists)
+                {
+                    User user = UserDatabaseAccess.GetUserByApiKey(dbContext, apiKey);
 
-            //        Claim[] claims =
-            //        {
-            //            new Claim(ClaimTypes.Name, user.UserName),
-            //            new Claim(ClaimTypes.Role, user.Role)
-            //        };
+                    Claim[] claims =
+                    {
+                        new Claim(ClaimTypes.Name, user.ApiKey),
+                        new Claim(ClaimTypes.Role, user.Role)
+                    };
 
-            //        ClaimsIdentity identity = new ClaimsIdentity(claims, "ApiKey");
-            //        context.User.AddIdentity(identity);
-            //    }
+                    ClaimsIdentity identity = new ClaimsIdentity(claims, "ApiKey");
+                    context.User.AddIdentity(identity);
+                }
 
-            //}
+            }
 
             await _next(context);
         }
