@@ -16,11 +16,11 @@ namespace iris_server.Controllers
         // ..api/compute/detectroom
         [HttpGet]
         // [Authorize(Roles = "Patient")]
-        public async Task<IActionResult> DetectRoom([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")]string id)
+        public IActionResult DetectRoom([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")]string id)
         {
             try
             {
-                bool authorised = await DbService.MatchApiKeyWithId(_ctx, apiKey, id);
+                bool authorised = DbService.MatchPatientApiKeyWithId(_ctx, apiKey, id).GetAwaiter().GetResult();
                 if (authorised)
                 {
                     //byte[] imageBytes = await Request.GetRawBodyBytesAsync();
@@ -44,11 +44,11 @@ namespace iris_server.Controllers
         // ..api/compute/detectconfusion
         [HttpGet]
         // [Authorize(Roles = "Patient")]
-        public async Task<IActionResult> DetectConfusion([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")]string id)
+        public IActionResult DetectConfusion([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")]string id)
         {
             try
             {
-                bool authorised = await DbService.MatchApiKeyWithId(_ctx, apiKey, id);
+                bool authorised =  DbService.MatchPatientApiKeyWithId(_ctx, apiKey, id).GetAwaiter().GetResult();
                 if (authorised)
                 {
                     //byte[] imageBytes = await Request.GetRawBodyBytesAsync();
@@ -72,13 +72,13 @@ namespace iris_server.Controllers
         // ..api/compute/detectfall
         [HttpGet]
         // [Authorize(Roles = "Patient")]
-        public async Task<IActionResult> DetectFall([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")]string id, [FromBody] JObject transforms)
+        public IActionResult DetectFall([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")]string id, [FromBody] JObject transforms)
         {
             //return DetectionService.DetectFall(transforms);
 
             try
             {
-                bool authorised = await DbService.MatchApiKeyWithId(_ctx, apiKey, id);
+                bool authorised =  DbService.MatchPatientApiKeyWithId(_ctx, apiKey, id).GetAwaiter().GetResult();
                 if (authorised)
                 {
                     //byte[] imageBytes = await Request.GetRawBodyBytesAsync();

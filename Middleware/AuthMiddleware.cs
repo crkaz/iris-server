@@ -1,4 +1,5 @@
 ﻿using iris_server.Models;
+using iris_server.Services;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System.Security.Claims;
@@ -22,11 +23,11 @@ namespace iris_server.Middleware
             if (context.Request.Headers.TryGetValue(apiKeyHeader, out var headerValues))
             {
                 apiKey = headerValues.FirstOrDefault(); // Extract from headerValues array.
-                bool keyExists = UserDatabaseAccess.LookupApiKey(dbContext, apiKey);
+                bool keyExists = await DbService.LookupApiKey(dbContext, apiKey);
 
                 if (keyExists)
                 {
-                    User user = UserDatabaseAccess.GetUserByApiKey(dbContext, apiKey);
+                    User user = await DbService.GetUserByApiKey(dbContext, apiKey);
 
                     Claim[] claims =
                     {

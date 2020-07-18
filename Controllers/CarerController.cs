@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Remotion.Linq.Utilities;
+using System.Threading.Tasks;
+using iris_server.Services;
 
 namespace iris_server.Controllers
 {
@@ -30,14 +32,14 @@ namespace iris_server.Controllers
                 }
                 else
                 {
-                    bool emailAlreadyExists = CarerDatabaseAccess.GetCarerById(_ctx, email) != null;
+                    bool emailAlreadyExists = DbService.GetCarerById(_ctx, email).GetAwaiter().GetResult() != null;
                     if (emailAlreadyExists)
                     {
                         return BadRequest("Email address already in use.");
                     }
                     else
                     {
-                        bool success = CarerDatabaseAccess.CreateCarer(_ctx, email);
+                        bool success = DbService.CreateCarer(_ctx, email).GetAwaiter().GetResult();
                         if (success)
                         {
                             return Ok("New carer added successfully.");
@@ -81,10 +83,10 @@ namespace iris_server.Controllers
         {
             try
             {
-                bool carerExists = CarerDatabaseAccess.GetCarerById(_ctx, id) != null;
+                bool carerExists = DbService.GetCarerById(_ctx, id).GetAwaiter().GetResult() != null;
                 if (carerExists)
                 {
-                    bool success = CarerDatabaseAccess.SendPasswordReset(_ctx, id);
+                    bool success = DbService.SendPasswordReset(_ctx, id);
                     if (success)
                     {
                         return Ok("Password reset sent successfully");
@@ -113,13 +115,13 @@ namespace iris_server.Controllers
         {
             try
             {
-                bool carerExists = CarerDatabaseAccess.GetCarerById(_ctx, id) != null;
+                bool carerExists = DbService.GetCarerById(_ctx, id).GetAwaiter().GetResult() != null;
                 if (carerExists)
                 {
-                    bool notDeletingSelf = !CarerDatabaseAccess.MatchApiKeyWithId(_ctx, apiKey, id);
+                    bool notDeletingSelf = !DbService.MatchCarerApiKeyWithId(_ctx, apiKey, id).GetAwaiter().GetResult();
                     if (notDeletingSelf)
                     {
-                        bool success = CarerDatabaseAccess.DeleteCarer(_ctx, id);
+                        bool success = DbService.DeleteCarer(_ctx, id).GetAwaiter().GetResult();
                         if (success)
                         {
                             return Ok("Carer deleted successfully.");

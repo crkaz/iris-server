@@ -17,14 +17,14 @@ namespace iris_server.Controllers
         // Modify a parameter of the patient's device configuration.
         // ..api/config/put?id=
         [Authorize(Roles = "admin,formalcarer,informalcarer")]
-        public async Task<IActionResult> Put([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromBody] JObject configJson)
+        public IActionResult Put([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromBody] JObject configJson)
         {
             try
             {
-                bool patientAssignedToThisCarer = CarerDatabaseAccess.PatientIsAssigned(_ctx, apiKey, id);
+                bool patientAssignedToThisCarer = DbService.PatientIsAssigned(_ctx, apiKey, id);
                 if (patientAssignedToThisCarer)
                 {
-                    bool success = await DbService.UpdatePatientConfig(_ctx, id, configJson);
+                    bool success = DbService.UpdatePatientConfig(_ctx, id, configJson).GetAwaiter().GetResult();
                     if (success)
                     {
                         return Ok("Updated patient successfully.");
@@ -49,14 +49,14 @@ namespace iris_server.Controllers
         // Get the patient's device configuration.
         // ..api/config/get?id=
         [Authorize(Roles = "admin,formalcarer,informalcarer")]
-        public async Task<IActionResult> Get([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
+        public IActionResult Get([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
         {
             try
             {
-                bool patientAssignedToThisCarer = CarerDatabaseAccess.PatientIsAssigned(_ctx, apiKey, id);
+                bool patientAssignedToThisCarer = DbService.PatientIsAssigned(_ctx, apiKey, id);
                 if (patientAssignedToThisCarer)
                 {
-                    Patient patient = await DbService.GetPatientById(_ctx, id);
+                    Patient patient =  DbService.GetPatientById(_ctx, id).GetAwaiter().GetResult();
                     return Ok(patient.Config);
                 }
                 else

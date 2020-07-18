@@ -20,14 +20,14 @@ namespace iris_server.Controllers
         /// ..api/patient/delete?id=
         [HttpDelete]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> Delete([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
+        public IActionResult Delete([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
         {
             try
             {
-                bool patientAssignedToThisCarer = CarerDatabaseAccess.PatientIsAssigned(_ctx, apiKey, id);
+                bool patientAssignedToThisCarer = DbService.PatientIsAssigned(_ctx, apiKey, id);
                 if (patientAssignedToThisCarer)
                 {
-                    bool success = await DbService.DeletePatientById(_ctx, id);
+                    bool success = DbService.DeletePatientById(_ctx, id).GetAwaiter().GetResult();
                     if (success)
                     {
                         return Ok();
@@ -50,7 +50,7 @@ namespace iris_server.Controllers
         /// ..api/patient/list?id=..&id=
         [HttpGet]
         [Authorize(Roles = "admin,formalcarer,informalcarer")]
-        public async Task<IActionResult> List([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string[] ids)
+        public IActionResult List([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string[] ids)
         {
             try
             {
@@ -58,10 +58,10 @@ namespace iris_server.Controllers
 
                 foreach (string id in ids)
                 {
-                    bool patientAssignedToThisCarer = CarerDatabaseAccess.PatientIsAssigned(_ctx, apiKey, id);
+                    bool patientAssignedToThisCarer = DbService.PatientIsAssigned(_ctx, apiKey, id);
                     if (patientAssignedToThisCarer)
                     {
-                        Patient patient = await DbService.GetPatientById(_ctx, id);
+                        Patient patient = DbService.GetPatientById(_ctx, id).GetAwaiter().GetResult();
 
                         if (patient != null)
                         {
@@ -92,14 +92,14 @@ namespace iris_server.Controllers
         /// ..api/patient/status?id=
         [HttpGet]
         [Authorize(Roles = "admin,formalcarer,informalcarer")]
-        public async Task<IActionResult> Status([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
+        public IActionResult Status([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
         {
             try
             {
-                bool patientAssignedToThisCarer = CarerDatabaseAccess.PatientIsAssigned(_ctx, apiKey, id);
+                bool patientAssignedToThisCarer = DbService.PatientIsAssigned(_ctx, apiKey, id);
                 if (patientAssignedToThisCarer)
                 {
-                    Patient patient = await DbService.GetPatientById(_ctx, id);
+                    Patient patient = DbService.GetPatientById(_ctx, id).GetAwaiter().GetResult();
                     bool patientExists = patient != null;
 
                     if (patientExists)
@@ -162,15 +162,15 @@ namespace iris_server.Controllers
         // Get the paginated logs of a patient.
         // ..api/patient/logs/?id=..&page=..&nitems=
         [Authorize(Roles = "admin,formalcarer,informalcarer")]
-        public async Task<IActionResult> Logs([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromQuery(Name = "page")] string page, [FromQuery(Name = "nitems")] string nItems)
+        public IActionResult Logs([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromQuery(Name = "page")] string page, [FromQuery(Name = "nitems")] string nItems)
         {
             try
             {
-                bool patientAssignedToCarer = CarerDatabaseAccess.PatientIsAssigned(_ctx, apiKey, id);
+                bool patientAssignedToCarer = DbService.PatientIsAssigned(_ctx, apiKey, id);
 
                 if (patientAssignedToCarer)
                 {
-                    ICollection<ActivityLog> logs = await DbService.GetLogs(_ctx, id, page, nItems);
+                    ICollection<ActivityLog> logs = DbService.GetLogs(_ctx, id, page, nItems).GetAwaiter().GetResult();
                     string logsJson = JsonConvert.SerializeObject(logs);
                     return Ok(logsJson);
                 }
