@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using iris_server.Extensions;
-using iris_server.Services;
 using iris_server.Models;
 using Newtonsoft.Json.Linq;
+using iris_server.Services;
 
 namespace iris_server.Controllers
 {
@@ -23,7 +20,7 @@ namespace iris_server.Controllers
         {
             try
             {
-                bool authorised = PatientDatabaseAccess.MatchApiKeyWithId(_ctx, apiKey, id);
+                bool authorised = await DbService.MatchApiKeyWithId(_ctx, apiKey, id);
                 if (authorised)
                 {
                     //byte[] imageBytes = await Request.GetRawBodyBytesAsync();
@@ -51,7 +48,7 @@ namespace iris_server.Controllers
         {
             try
             {
-                bool authorised = PatientDatabaseAccess.MatchApiKeyWithId(_ctx, apiKey, id);
+                bool authorised = await DbService.MatchApiKeyWithId(_ctx, apiKey, id);
                 if (authorised)
                 {
                     //byte[] imageBytes = await Request.GetRawBodyBytesAsync();
@@ -81,7 +78,7 @@ namespace iris_server.Controllers
 
             try
             {
-                bool authorised = PatientDatabaseAccess.MatchApiKeyWithId(_ctx, apiKey, id);
+                bool authorised = await DbService.MatchApiKeyWithId(_ctx, apiKey, id);
                 if (authorised)
                 {
                     //byte[] imageBytes = await Request.GetRawBodyBytesAsync();

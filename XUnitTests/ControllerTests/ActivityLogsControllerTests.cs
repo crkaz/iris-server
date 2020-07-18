@@ -11,188 +11,79 @@ namespace XUnitTests
 {
     public class ActivityLogsControllerTests
     {
-        [Fact]
-        public async Task GetActivityLogsOkRequest_HasLogs()
-        {
-            // arrange
-            TestClient testClient = new TestClient();
-            const string endpoint = "activitylogs/get/?id=testpatient&page=1&nitems=5";
-            const int expectedNLogs = 2;
-            List<string> expectedLogIds = new List<string>() { "testlog1", "testlog2" };
-            const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
-            testClient.AddHeader("ApiKey", "testcarer");
-            List<string> actualLogIds = new List<string>();
+        //[Fact]
+        //public async Task PostActivityLogsOkRequest()
+        //{
+        //    // arrange
+        //    
+        //    const string endpoint = "activitylogs/post/?id=testpatient";
+        //    const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
+        //    ActivityLog newLog = new ActivityLog();
+        //    string requestBody = JsonConvert.SerializeObject(newLog);
+        //    const string expectedResponseBody = "Activity log added successfully.";
+        //    TestClient.Instance.AddHeader("ApiKey", "testpatient");
 
-            // act
-            HttpResponseMessage response = await testClient.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
-            ActivityLog[] logs = JsonConvert.DeserializeObject<ActivityLog[]>(responseContentJson);
-            int actualNLogs = logs.Length;
-            HttpStatusCode actualStatusCode = response.StatusCode;
-            foreach (ActivityLog a in logs)
-            {
-                actualLogIds.Add(a.Id);
-            }
+        //    // act
+        //    HttpResponseMessage response = await TestClient.Instance.PostRequest(endpoint, body: requestBody);
+        //    string actualResponseBody = await response.Content.ReadAsStringAsync();
+        //    HttpStatusCode actualStatusCode = response.StatusCode;
 
-            // assert
-            Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedNLogs, actualNLogs);
-            Assert.Equal(expectedLogIds, actualLogIds);
+        //    // assert
+        //    Assert.Equal(expectedStatusCode, actualStatusCode);
+        //    Assert.Equal(expectedResponseBody, actualResponseBody);
 
-            testClient.Destroy();
-        }
-
-        [Fact]
-        public async Task GetActivityLogsOkRequest_NegativePagination()
-        {
-            // arrange
-            TestClient testClient = new TestClient();
-            const string endpoint = "activitylogs/get/?id=testpatient&page=1&nitems=-5";
-            const int expectedNLogs = 2;
-            List<string> expectedLogIds = new List<string>() { "testlog1", "testlog2" };
-            const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
-            testClient.AddHeader("ApiKey", "testcarer");
-            List<string> actualLogIds = new List<string>();
-
-            // act
-            HttpResponseMessage response = await testClient.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
-            ActivityLog[] logs = JsonConvert.DeserializeObject<ActivityLog[]>(responseContentJson);
-            int actualNLogs = logs.Length;
-            HttpStatusCode actualStatusCode = response.StatusCode;
-            foreach (ActivityLog a in logs)
-            {
-                actualLogIds.Add(a.Id);
-            }
-
-            // assert
-            Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedNLogs, actualNLogs);
-            Assert.Equal(expectedLogIds, actualLogIds);
-
-            testClient.Destroy();
-        }
+        //    
+        //}
 
 
-        [Fact]
-        public async Task GetActivityLogsOkRequest_HasNoLogs()
-        {
-            // arrange
-            TestClient testClient = new TestClient();
-            const string endpoint = "activitylogs/get/?id=testpatient2&page=1&nitems=5";
-            const int expectedNLogs = 0;
-            const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
-            testClient.AddHeader("ApiKey", "testcarer");
+        //[Fact]
+        //public async Task PostActivityLogsUnauthorised()
+        //{
+        //    // arrange
+        //    
+        //    const string endpoint = "activitylogs/post/?id=testpatient";
+        //    const HttpStatusCode expectedStatusCode = HttpStatusCode.Unauthorized;
+        //    ActivityLog newLog = new ActivityLog();
+        //    string requestBody = JsonConvert.SerializeObject(newLog);
+        //    const string expectedResponseBody = "Invalid credentials.";
+        //    TestClient.Instance.AddHeader("ApiKey", "testpatient2");
 
-            // act
-            HttpResponseMessage response = await testClient.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
-            ActivityLog[] logs = JsonConvert.DeserializeObject<ActivityLog[]>(responseContentJson);
-            int actualNLogs = logs.Length;
-            HttpStatusCode actualStatusCode = response.StatusCode;
+        //    // act
+        //    HttpResponseMessage response = await TestClient.Instance.PostRequest(endpoint, body: requestBody);
+        //    string actualResponseBody = await response.Content.ReadAsStringAsync();
+        //    HttpStatusCode actualStatusCode = response.StatusCode;
 
-            // assert
-            Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedNLogs, actualNLogs);
+        //    // assert
+        //    Assert.Equal(expectedStatusCode, actualStatusCode);
+        //    Assert.Equal(expectedResponseBody, actualResponseBody);
 
-            testClient.Destroy();
-        }
-
-
-        [Fact]
-        public async Task GetActivityLogsUnauthorised()
-        {
-            // arrange
-            TestClient testClient = new TestClient();
-            const string endpoint = "activitylogs/get/?id=testpatient&page=1&nitems=5";
-            const HttpStatusCode expectedStatusCode = HttpStatusCode.Unauthorized;
-            testClient.AddHeader("ApiKey", "testcarer_nopatients");
-
-            // act
-            HttpResponseMessage response = await testClient.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
-            HttpStatusCode actualStatusCode = response.StatusCode;
-
-            // assert
-            Assert.Equal(expectedStatusCode, actualStatusCode);
-
-            testClient.Destroy();
-        }
+        //    
+        //}
 
 
-        [Fact]
-        public async Task PostActivityLogsOkRequest()
-        {
-            // arrange
-            TestClient testClient = new TestClient();
-            const string endpoint = "activitylogs/post/?id=testpatient";
-            const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
-            ActivityLog newLog = new ActivityLog();
-            string requestBody = JsonConvert.SerializeObject(newLog);
-            const string expectedResponseBody = "Activity log added successfully.";
-            testClient.AddHeader("ApiKey", "testpatient");
+        //[Fact]
+        //public async Task PostActivityLogsBadRequest()
+        //{
+        //    // arrange
+        //    
+        //    const string endpoint = "activitylogs/post/?id=testpatient";
+        //    const HttpStatusCode expectedStatusCode = HttpStatusCode.BadRequest;
+        //    Carer carer = new Carer();
+        //    string requestBody = JsonConvert.SerializeObject(carer);
+        //    const string expectedResponseBody = "Failed to log activity.";
+        //    TestClient.Instance.AddHeader("ApiKey", "testpatient");
 
-            // act
-            HttpResponseMessage response = await testClient.PostRequest(endpoint, body: requestBody);
-            string actualResponseBody = await response.Content.ReadAsStringAsync();
-            HttpStatusCode actualStatusCode = response.StatusCode;
+        //    // act
+        //    HttpResponseMessage response = await TestClient.Instance.PostRequest(endpoint, body: requestBody);
+        //    string actualResponseBody = await response.Content.ReadAsStringAsync();
+        //    HttpStatusCode actualStatusCode = response.StatusCode;
 
-            // assert
-            Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedResponseBody, actualResponseBody);
+        //    // assert
+        //    Assert.Equal(expectedStatusCode, actualStatusCode);
+        //    Assert.Equal(expectedResponseBody, actualResponseBody);
 
-            testClient.Destroy();
-        }
-
-
-        [Fact]
-        public async Task PostActivityLogsUnauthorised()
-        {
-            // arrange
-            TestClient testClient = new TestClient();
-            const string endpoint = "activitylogs/post/?id=testpatient";
-            const HttpStatusCode expectedStatusCode = HttpStatusCode.Unauthorized;
-            ActivityLog newLog = new ActivityLog();
-            string requestBody = JsonConvert.SerializeObject(newLog);
-            const string expectedResponseBody = "Invalid credentials.";
-            testClient.AddHeader("ApiKey", "testpatient2");
-
-            // act
-            HttpResponseMessage response = await testClient.PostRequest(endpoint, body: requestBody);
-            string actualResponseBody = await response.Content.ReadAsStringAsync();
-            HttpStatusCode actualStatusCode = response.StatusCode;
-
-            // assert
-            Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedResponseBody, actualResponseBody);
-
-            testClient.Destroy();
-        }
-
-
-        [Fact]
-        public async Task PostActivityLogsBadRequest()
-        {
-            // arrange
-            TestClient testClient = new TestClient();
-            const string endpoint = "activitylogs/post/?id=testpatient";
-            const HttpStatusCode expectedStatusCode = HttpStatusCode.BadRequest;
-            Carer carer = new Carer();
-            string requestBody = JsonConvert.SerializeObject(carer);
-            const string expectedResponseBody = "Failed to log activity.";
-            testClient.AddHeader("ApiKey", "testpatient");
-
-            // act
-            HttpResponseMessage response = await testClient.PostRequest(endpoint, body: requestBody);
-            string actualResponseBody = await response.Content.ReadAsStringAsync();
-            HttpStatusCode actualStatusCode = response.StatusCode;
-
-            // assert
-            Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedResponseBody, actualResponseBody);
-
-            testClient.Destroy();
-        }
+        //    
+        //}
 
 
     }

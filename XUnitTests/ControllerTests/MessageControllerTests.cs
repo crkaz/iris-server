@@ -6,6 +6,9 @@ using iris_server.Models;
 using XUnitTests.Utils;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Linq;
+using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
+using System.Diagnostics.CodeAnalysis;
 
 namespace XUnitTests
 {
@@ -18,18 +21,18 @@ namespace XUnitTests
         public async Task PostPatientMessageOkRequest()
         {
             // arrange
-            TestClient testClient = new TestClient();
+            
             const string endpoint = "message/post/?id=testpatient";
             const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
             PatientMessage patientMessage = new PatientMessage();
             patientMessage.Title = "test title";
             patientMessage.Message = "test message";
             string requestBody = JsonConvert.SerializeObject(patientMessage);
-            testClient.AddHeader("ApiKey", "testcarer");
+            TestClient.Instance.AddHeader("ApiKey", "testcarer");
             const string expectedResponseBody = "Message sent successfully.";
 
             // act
-            HttpResponseMessage response = await testClient.PostRequest(endpoint, body: requestBody);
+            HttpResponseMessage response = await TestClient.Instance.PostRequest(endpoint, body: requestBody);
             HttpStatusCode actualStatusCode = response.StatusCode;
             string actualResponseBody = await response.Content.ReadAsStringAsync();
 
@@ -37,7 +40,7 @@ namespace XUnitTests
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedResponseBody, actualResponseBody);
 
-            testClient.Destroy();
+            
         }
 
 
@@ -48,16 +51,16 @@ namespace XUnitTests
         public async Task PostPatientMessageUnauthorised()
         {
             // arrange
-            TestClient testClient = new TestClient();
+            
             const string endpoint = "message/post/?id=testpatient";
             const HttpStatusCode expectedStatusCode = HttpStatusCode.Unauthorized;
-            testClient.AddHeader("ApiKey", "testcarer_nopatients");
+            TestClient.Instance.AddHeader("ApiKey", "testcarer_nopatients");
             PatientMessage patientMessage = new PatientMessage();
             string requestBody = JsonConvert.SerializeObject(patientMessage);
             const string expectedResponseBody = "You are not assigned to this patient.";
 
             // act
-            HttpResponseMessage response = await testClient.PostRequest(endpoint, body: requestBody);
+            HttpResponseMessage response = await TestClient.Instance.PostRequest(endpoint, body: requestBody);
             HttpStatusCode actualStatusCode = response.StatusCode;
             string actualResponseBody = await response.Content.ReadAsStringAsync();
 
@@ -65,7 +68,7 @@ namespace XUnitTests
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedResponseBody, actualResponseBody);
 
-            testClient.Destroy();
+            
         }
 
 
@@ -76,16 +79,16 @@ namespace XUnitTests
         public async Task PostPatientMessageBadRequest()
         {
             // arrange
-            TestClient testClient = new TestClient();
+            
             const string endpoint = "message/post/?id=testpatient";
             const HttpStatusCode expectedStatusCode = HttpStatusCode.BadRequest;
-            testClient.AddHeader("ApiKey", "testcarer");
+            TestClient.Instance.AddHeader("ApiKey", "testcarer");
             Carer carer = new Carer();
             string requestBody = JsonConvert.SerializeObject(carer);
             const string expectedResponseBody = "Failed to send message.";
 
             // act
-            HttpResponseMessage response = await testClient.PostRequest(endpoint, body: requestBody);
+            HttpResponseMessage response = await TestClient.Instance.PostRequest(endpoint, body: requestBody);
             HttpStatusCode actualStatusCode = response.StatusCode;
             string actualResponseBody = await response.Content.ReadAsStringAsync();
 
@@ -93,7 +96,7 @@ namespace XUnitTests
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedResponseBody, actualResponseBody);
 
-            testClient.Destroy();
+            
         }
 
 
@@ -104,22 +107,31 @@ namespace XUnitTests
         public async Task GetPatientMessageOkRequest()
         {
             // arrange
-            TestClient testClient = new TestClient();
+            
             const string endpoint = "message/get/?id=testpatient";
             const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
-            testClient.AddHeader("ApiKey", "testpatient");
+            TestClient.Instance.AddHeader("ApiKey", "testpatient");
 
             // act
-            HttpResponseMessage response = await testClient.GetRequest(endpoint);
+            HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
             HttpStatusCode actualStatusCode = response.StatusCode;
             string responseBody = await response.Content.ReadAsStringAsync();
-            IList<PatientMessage> actualPatientMessage = JsonConvert.DeserializeObject<IList<PatientMessage>>(responseBody);
+            IList<PatientMessage> actualPatientMessages = JsonConvert.DeserializeObject<IList<PatientMessage>>(responseBody);
+            bool allMessagesAreUnread = true;
+            foreach (var msg in actualPatientMessages)
+            {
+                if (msg.Read != null)
+                {
+                    allMessagesAreUnread = false;
+                    break;
+                }
+            }
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal("testpatient", actualPatientMessage[0].Id);
+            Assert.True(allMessagesAreUnread);
 
-            testClient.Destroy();
+            
         }
 
 
@@ -130,14 +142,14 @@ namespace XUnitTests
         public async Task GetPatientMessageUnathorised()
         {
             // arrange
-            TestClient testClient = new TestClient();
+            
             const string endpoint = "message/get/?id=testpatient";
             const HttpStatusCode expectedStatusCode = HttpStatusCode.Unauthorized;
-            testClient.AddHeader("ApiKey", "testpatient2");
+            TestClient.Instance.AddHeader("ApiKey", "testpatient2");
             const string expectedResponseBody = "Credentials do not match.";
 
             // act
-            HttpResponseMessage response = await testClient.GetRequest(endpoint);
+            HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
             HttpStatusCode actualStatusCode = response.StatusCode;
             string actualResponseBody = await response.Content.ReadAsStringAsync();
 
@@ -145,7 +157,7 @@ namespace XUnitTests
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedResponseBody, actualResponseBody);
 
-            testClient.Destroy();
+            
         }
     }
 }

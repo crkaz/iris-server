@@ -1,12 +1,12 @@
-﻿
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using iris_server.Models;
 using Newtonsoft.Json.Linq;
+using Microsoft.AspNetCore.Rewrite.Internal;
+using System;
+using System.Collections.Generic;
+using Newtonsoft.Json;
+using Remotion.Linq.Utilities;
 
 namespace iris_server.Controllers
 {
@@ -19,9 +19,40 @@ namespace iris_server.Controllers
         // Create a new user in the system.
         // ..api/carer/post
         [Authorize(Roles = "admin")]
-        public IActionResult Post([FromBody] JObject carerJson)
+        public IActionResult Post([FromBody] string email)
         {
-            return Ok("Endpoint works.");
+            try
+            {
+                bool emailValid = (!string.IsNullOrWhiteSpace(email) && email.Contains("@"));
+                if (!emailValid)
+                {
+                    return BadRequest("Invalid email format.");
+                }
+                else
+                {
+                    bool emailAlreadyExists = CarerDatabaseAccess.GetCarerById(_ctx, email) != null;
+                    if (emailAlreadyExists)
+                    {
+                        return BadRequest("Email address already in use.");
+                    }
+                    else
+                    {
+                        bool success = CarerDatabaseAccess.CreateCarer(_ctx, email);
+                        if (success)
+                        {
+                            return Ok("New carer added successfully.");
+                        }
+                        else
+                        {
+                            return BadRequest("Failed to create new carer.");
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
         }
 
         // Return the collection of users registered in the system.
@@ -30,7 +61,15 @@ namespace iris_server.Controllers
         [Authorize(Roles = "admin")]
         public IActionResult Get()
         {
-            return Ok("Endpoint works.");
+            try
+            {
+                string carers = JsonConvert.SerializeObject(_ctx.Carers);
+                return Ok(carers);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
         }
 
 
@@ -40,16 +79,70 @@ namespace iris_server.Controllers
         [Authorize(Roles = "admin")]
         public IActionResult Reset([FromQuery(Name = "id")] string id)
         {
-            return Ok("Endpoint works.");
+            try
+            {
+                bool carerExists = CarerDatabaseAccess.GetCarerById(_ctx, id) != null;
+                if (carerExists)
+                {
+                    bool success = CarerDatabaseAccess.SendPasswordReset(_ctx, id);
+                    if (success)
+                    {
+                        return Ok("Password reset sent successfully");
+                    }
+                    else
+                    {
+                        return BadRequest("Failed to send password reset.");
+                    }
+                }
+                else
+                {
+                    return NotFound("Could not find a carer with that email.");
+                }
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
         }
 
 
         // Delete a user from the system, given their id.
         // ..api/carer/delete?id=
         [Authorize(Roles = "admin")]
-        public IActionResult Delete([FromQuery(Name = "id")] string id)
+        public IActionResult Delete([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
         {
-            return Ok("Endpoint works.");
+            try
+            {
+                bool carerExists = CarerDatabaseAccess.GetCarerById(_ctx, id) != null;
+                if (carerExists)
+                {
+                    bool notDeletingSelf = !CarerDatabaseAccess.MatchApiKeyWithId(_ctx, apiKey, id);
+                    if (notDeletingSelf)
+                    {
+                        bool success = CarerDatabaseAccess.DeleteCarer(_ctx, id);
+                        if (success)
+                        {
+                            return Ok("Carer deleted successfully.");
+                        }
+                        else
+                        {
+                            return BadRequest("Failed to delete carer.");
+                        }
+                    }
+                    else
+                    {
+                        return Unauthorized("Accounts must be deleted by an admin other than yourself.");
+                    }
+                }
+                else
+                {
+                    return NotFound("Could not find a carer with that email.");
+                }
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
         }
 
 

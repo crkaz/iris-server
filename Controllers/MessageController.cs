@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using iris_server.Models;
+using iris_server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
@@ -17,14 +19,14 @@ namespace iris_server.Controllers
         // Send a message to a patient.
         // ..api/message/post?id=
         [Authorize(Roles = "admin,formalcarer,informalcarer")]
-        public IActionResult Post([FromHeader(Name = "ApiKey")]string apiKey, [FromQuery(Name = "id")] string id, [FromBody] JObject titleAndMessage)
+        public async Task<IActionResult> Post([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromBody] JObject titleAndMessage)
         {
             try
             {
                 bool patientAssignedToThisCarer = CarerDatabaseAccess.PatientIsAssigned(_ctx, apiKey, id);
                 if (patientAssignedToThisCarer)
                 {
-                    bool success = PatientDatabaseAccess.MessagePatient(_ctx, apiKey, id, titleAndMessage);
+                    bool success = await DbService.MessagePatient(_ctx, apiKey, id, titleAndMessage);
                     if (success)
                     {
                         return Ok("Message sent successfully.");
@@ -49,15 +51,15 @@ namespace iris_server.Controllers
         // Get a patients unread messages.
         // ..api/message/get?id=
         [Authorize(Roles = "patient")]
-        public IActionResult Get([FromHeader(Name = "ApiKey")]string apiKey, [FromQuery(Name = "id")] string id)
+        public async Task<IActionResult> Get([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
         {
             try
             {
-                bool authorised = PatientDatabaseAccess.MatchApiKeyWithId(_ctx, apiKey, id);
+                bool authorised = await DbService.MatchApiKeyWithId(_ctx, apiKey, id);
 
                 if (authorised)
                 {
-                    Patient patient = PatientDatabaseAccess.GetPatientByApiKey(_ctx, apiKey);
+                    Patient patient = DbService.GetPatientByApiKey(_ctx, apiKey);
 
                     // Get unread messages.
                     IEnumerable<PatientMessage> unreadMessages = patient.Messages.Where(message => message.Read == null);

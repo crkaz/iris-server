@@ -15,11 +15,25 @@ namespace XUnitTests.Utils
         private const string HOST = "http://localhost:54268/api/";
         private readonly HttpClient Client = new HttpClient();
 
-        // Constructor
-        public TestClient(string host = HOST)
+        #region Singleton pattern.
+        private static TestClient instance;
+        public static TestClient Instance
         {
-            Init(host);
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new TestClient();
+                }
+                return instance;
+            }
         }
+
+        private TestClient()
+        {
+            Init(HOST);
+        }
+        #endregion
 
 
         private void Init(string host)

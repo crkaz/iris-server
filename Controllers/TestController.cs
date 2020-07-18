@@ -3,16 +3,16 @@ using iris_server.Models;
 
 namespace iris_server.Controllers
 {
-    public class StatusController : BaseController
+    public class TestController : BaseController
     {
         /// Constructor injects the user context using dependency injection, via the BaseController. 
-        public StatusController(DatabaseContext context) : base(context) { }
+        public TestController(DatabaseContext context) : base(context) { }
 
 
         // Check if the host is available.
-        // ..api/status/
+        // ..api/test/status/
         [HttpGet]
-        public IActionResult Check()
+        public IActionResult Status()
         {
             return Ok("iris-server is online");
         }

@@ -94,13 +94,13 @@ namespace iris_server.Migrations
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<string>("Ip");
+
                     b.Property<int>("ResponseCode");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate();
-
-                    b.Property<bool>("Test");
 
                     b.Property<string>("UserApiKey");
 

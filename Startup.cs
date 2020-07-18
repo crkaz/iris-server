@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,17 +30,18 @@ namespace iris_server
                                       builder.WithOrigins("http://localhost:4200");
                                   });
             });
-            // services.AddResponseCaching();
+
+            services.AddResponseCaching();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
-            // Initialise usercontext for dependency injection via BaseController.
+            // Initialise database context for dependency injection via BaseController.
             services.AddDbContext<Models.DatabaseContext>();
 
             services.AddMvc(options =>
             {
                 // options.AllowEmptyInputInBodyModelBinding = true;
-                options.Filters.Add(new Filters.AuthFilter());// All actions are authorised by the auth filter..
+                options.Filters.Add(new Filters.AuthFilter());// All actions are authorised by the auth filter.
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 

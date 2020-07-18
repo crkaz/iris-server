@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using iris_server.Models;
+using iris_server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace iris_server.Controllers
 {
@@ -21,14 +20,14 @@ namespace iris_server.Controllers
         /// ..api/patient/delete?id=
         [HttpDelete]
         [Authorize(Roles = "admin")]
-        public IActionResult Delete([FromHeader(Name = "ApiKey")]string apiKey, [FromQuery(Name = "id")] string id)
+        public async Task<IActionResult> Delete([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
         {
             try
             {
                 bool patientAssignedToThisCarer = CarerDatabaseAccess.PatientIsAssigned(_ctx, apiKey, id);
                 if (patientAssignedToThisCarer)
                 {
-                    bool success = PatientDatabaseAccess.DeletePatientById(_ctx, id);
+                    bool success = await DbService.DeletePatientById(_ctx, id);
                     if (success)
                     {
                         return Ok();
@@ -51,7 +50,7 @@ namespace iris_server.Controllers
         /// ..api/patient/list?id=..&id=
         [HttpGet]
         [Authorize(Roles = "admin,formalcarer,informalcarer")]
-        public IActionResult List([FromHeader(Name = "ApiKey")]string apiKey, [FromQuery(Name = "id")] string[] ids)
+        public async Task<IActionResult> List([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string[] ids)
         {
             try
             {
@@ -62,7 +61,7 @@ namespace iris_server.Controllers
                     bool patientAssignedToThisCarer = CarerDatabaseAccess.PatientIsAssigned(_ctx, apiKey, id);
                     if (patientAssignedToThisCarer)
                     {
-                        Patient patient = PatientDatabaseAccess.GetPatientById(_ctx, id);
+                        Patient patient = await DbService.GetPatientById(_ctx, id);
 
                         if (patient != null)
                         {
@@ -93,14 +92,14 @@ namespace iris_server.Controllers
         /// ..api/patient/status?id=
         [HttpGet]
         [Authorize(Roles = "admin,formalcarer,informalcarer")]
-        public IActionResult Status([FromHeader(Name = "ApiKey")]string apiKey, [FromQuery(Name = "id")] string id)
+        public async Task<IActionResult> Status([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
         {
             try
             {
                 bool patientAssignedToThisCarer = CarerDatabaseAccess.PatientIsAssigned(_ctx, apiKey, id);
                 if (patientAssignedToThisCarer)
                 {
-                    Patient patient = PatientDatabaseAccess.GetPatientById(_ctx, id);
+                    Patient patient = await DbService.GetPatientById(_ctx, id);
                     bool patientExists = patient != null;
 
                     if (patientExists)
@@ -128,16 +127,16 @@ namespace iris_server.Controllers
         /// ..api/patient/status?id=&=status
         [HttpPut]
         [Authorize(Roles = "patient")]
-        public IActionResult Status([FromHeader(Name = "ApiKey")]string apiKey, [FromQuery(Name = "id")] string id, [FromQuery(Name = "status")] string status)
+        public IActionResult Status([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromQuery(Name = "status")] string status)
         {
             try
             {
-                bool authorised = PatientDatabaseAccess.GetPatientByApiKey(_ctx, apiKey).Id == id;
+                bool authorised = DbService.GetPatientByApiKey(_ctx, apiKey).Id == id;
                 if (authorised)
                 {
                     string[] enumNames = Enum.GetNames(typeof(Patient.PatientStatus));
                     bool validStatus = enumNames.Contains(status);
-                    Patient patient = PatientDatabaseAccess.GetPatientByApiKey(_ctx, apiKey);
+                    Patient patient = DbService.GetPatientByApiKey(_ctx, apiKey);
                     if (validStatus)
                     {
                         patient.Status = status;
@@ -159,5 +158,32 @@ namespace iris_server.Controllers
             }
         }
 
+
+        // Get the paginated logs of a patient.
+        // ..api/patient/logs/?id=..&page=..&nitems=
+        [Authorize(Roles = "admin,formalcarer,informalcarer")]
+        public async Task<IActionResult> Logs([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromQuery(Name = "page")] string page, [FromQuery(Name = "nitems")] string nItems)
+        {
+            try
+            {
+                bool patientAssignedToCarer = CarerDatabaseAccess.PatientIsAssigned(_ctx, apiKey, id);
+
+                if (patientAssignedToCarer)
+                {
+                    ICollection<ActivityLog> logs = await DbService.GetLogs(_ctx, id, page, nItems);
+                    string logsJson = JsonConvert.SerializeObject(logs);
+                    return Ok(logsJson);
+                }
+                else
+                {
+                    return Unauthorized("You are not assigned to this patient.");
+                }
+                // Return logs as a paginated json collection
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
     }
 }
