@@ -46,15 +46,15 @@ namespace iris_server.Migrations
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("CarerId");
+                    b.Property<string>("CarerEmail");
 
                     b.Property<string>("Description");
 
                     b.Property<DateTime>("End");
 
-                    b.Property<string>("JsonReminders");
-
                     b.Property<string>("PatientId");
+
+                    b.Property<string>("Reminders");
 
                     b.Property<int>("Repeat");
 
@@ -65,6 +65,8 @@ namespace iris_server.Migrations
                     b.Property<DateTime>("Start");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CarerEmail");
 
                     b.HasIndex("PatientId");
 
@@ -92,9 +94,13 @@ namespace iris_server.Migrations
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<int>("ResponseCode");
+
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate();
+
+                    b.Property<bool>("Test");
 
                     b.Property<string>("UserApiKey");
 
@@ -114,9 +120,9 @@ namespace iris_server.Migrations
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("JsonConfig");
+                    b.Property<string>("ConfigId");
 
-                    b.Property<string>("JsonPatientInfo");
+                    b.Property<string>("NotesId");
 
                     b.Property<string>("Status");
 
@@ -124,9 +130,29 @@ namespace iris_server.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ConfigId");
+
+                    b.HasIndex("NotesId");
+
                     b.HasIndex("UserApiKey");
 
                     b.ToTable("Patients");
+                });
+
+            modelBuilder.Entity("iris_server.Models.PatientConfig", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("EnabledFeatures");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate();
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PatientConfig");
                 });
 
             modelBuilder.Entity("iris_server.Models.PatientMessage", b =>
@@ -134,7 +160,7 @@ namespace iris_server.Migrations
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("CarerId");
+                    b.Property<string>("CarerEmail");
 
                     b.Property<string>("Message");
 
@@ -148,9 +174,31 @@ namespace iris_server.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CarerEmail");
+
                     b.HasIndex("PatientId");
 
                     b.ToTable("Messages");
+                });
+
+            modelBuilder.Entity("iris_server.Models.PatientNotes", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("Age");
+
+                    b.Property<int>("Diagnosis");
+
+                    b.Property<string>("Notes");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate();
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PatientNotes");
                 });
 
             modelBuilder.Entity("iris_server.Models.StickyNote", b =>
@@ -196,6 +244,10 @@ namespace iris_server.Migrations
 
             modelBuilder.Entity("iris_server.Models.CalendarEntry", b =>
                 {
+                    b.HasOne("iris_server.Models.Carer", "Carer")
+                        .WithMany()
+                        .HasForeignKey("CarerEmail");
+
                     b.HasOne("iris_server.Models.Patient")
                         .WithMany("CalendarEntries")
                         .HasForeignKey("PatientId");
@@ -217,6 +269,14 @@ namespace iris_server.Migrations
 
             modelBuilder.Entity("iris_server.Models.Patient", b =>
                 {
+                    b.HasOne("iris_server.Models.PatientConfig", "Config")
+                        .WithMany()
+                        .HasForeignKey("ConfigId");
+
+                    b.HasOne("iris_server.Models.PatientNotes", "Notes")
+                        .WithMany()
+                        .HasForeignKey("NotesId");
+
                     b.HasOne("iris_server.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserApiKey");
@@ -224,6 +284,10 @@ namespace iris_server.Migrations
 
             modelBuilder.Entity("iris_server.Models.PatientMessage", b =>
                 {
+                    b.HasOne("iris_server.Models.Carer", "Carer")
+                        .WithMany()
+                        .HasForeignKey("CarerEmail");
+
                     b.HasOne("iris_server.Models.Patient")
                         .WithMany("Messages")
                         .HasForeignKey("PatientId");

@@ -4,6 +4,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using iris_server.Services;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace iris_server.Models
 {
@@ -16,8 +18,8 @@ namespace iris_server.Models
         public string Id { get; set; } // Primary Key.
         public virtual User User { get; set; } // Foreign Key.
         public string Status { get; set; }
-        public string JsonPatientInfo { get; set; }
-        public string JsonConfig { get; set; }
+        public virtual PatientNotes Notes { get; set; }
+        public virtual PatientConfig Config { get; set; }
         public virtual ICollection<ActivityLog> ActivityLogs { get; set; }
         public virtual ICollection<CalendarEntry> CalendarEntries { get; set; }
         public virtual ICollection<StickyNote> Stickies { get; set; }
@@ -35,9 +37,9 @@ namespace iris_server.Models
                 Patient patient = ctx.Patients.Find(id);
                 return patient;
             }
-            catch
+            catch (Exception e)
             {
-                // Log error.
+                Console.WriteLine(e);
                 return null;
             }
         }
@@ -54,11 +56,32 @@ namespace iris_server.Models
                     }
                 }
             }
-            catch
+            catch (Exception e)
             {
-                // Log error.
+                Console.WriteLine(e);
             }
             return null;
+        }
+
+        public static bool MatchApiKeyWithId(DatabaseContext ctx, string apiKey, string id)
+        {
+            try
+            {
+                Patient p1 = GetPatientByApiKey(ctx, apiKey);
+                Patient p2 = GetPatientById(ctx, id);
+
+                if (p1 == p2)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
         }
 
         public static bool DeletePatientById(DatabaseContext ctx, string id)
@@ -79,9 +102,149 @@ namespace iris_server.Models
                     return true;
                 }
             }
-            catch
+            catch (Exception e)
             {
-                // Log error.
+                Console.WriteLine(e);
+            }
+            return false;
+        }
+
+        public static bool UpdatePatientNotes(DatabaseContext ctx, string id, JObject notesJson)
+        {
+            try
+            {
+                var jsonDict = JObject.FromObject(notesJson).ToObject<Dictionary<string, object>>();
+                Patient patient = GetPatientById(ctx, id);
+                bool changes = false;
+
+                foreach (string key in jsonDict.Keys)
+                {
+                    switch (key.ToLower())
+                    {
+                        case "age":
+                            int age = (int)(long)jsonDict["Age"];
+                            patient.Notes.Age = (PatientNotes.AgeRange)age;
+                            changes = true;
+                            break;
+                        case "diagnosis":
+                            int diagnosis = (int)(long)jsonDict["Diagnosis"];
+                            patient.Notes.Diagnosis = (PatientNotes.Severity)diagnosis;
+                            changes = true;
+                            break;
+                        case "notes":
+                            string notes = (string)jsonDict["Notes"];
+                            patient.Notes.Notes = (string)notes;
+                            changes = true;
+                            break;
+                    }
+                }
+
+                if (changes)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
+        }
+
+        // TODO:
+        public static bool UpdatePatientConfig(DatabaseContext ctx, string id, JObject configJson)
+        {
+            try
+            {
+                var jsonDict = JObject.FromObject(configJson).ToObject<Dictionary<string, object>>();
+                Patient patient = GetPatientById(ctx, id);
+                bool changes = false;
+
+                foreach (string key in jsonDict.Keys)
+                {
+                    switch (key.ToLower())
+                    {
+                        case "inputs":
+                            //int age = (int)(long)jsonDict["Age"];
+                            //patient.Config.EnabledFeatures = (PatientNotes.AgeRange)age;
+                            changes = true;
+                            break;
+                        case "falldetection":
+                            changes = true;
+                            break;
+                        case "roomdetection":
+                            changes = true;
+                            break;
+                        case "confusiondetection":
+                            changes = true;
+                            break;
+                        case "stickynotes":
+                            changes = true;
+                            break;
+                    }
+                }
+
+                if (changes)
+                {
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
+        }
+
+        public static bool MessagePatient(DatabaseContext ctx, string carerApiKey, string patientId, JObject messageJson)
+        {
+            try
+            {
+                var jsonDict = JObject.FromObject(messageJson).ToObject<Dictionary<string, object>>();
+                string title = (string)jsonDict["Title"];
+                string message = (string)jsonDict["Message"];
+
+                Carer sender = CarerDatabaseAccess.GetCarerByApiKey(ctx, carerApiKey);
+                if (sender != null)
+                {
+                    Patient recipient = GetPatientById(ctx, patientId);
+                    if (recipient != null)
+                    {
+                        PatientMessage messageObj = new PatientMessage() { Carer = sender, Read = null, Sent = DateTime.Now, Title = title, Message = message };
+                        recipient.Messages.Add(messageObj);
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
+        }
+
+        public static bool LogActivity(DatabaseContext ctx, string id, JObject logEntryJson)
+        {
+            try
+            {
+                var jsonDict = JObject.FromObject(logEntryJson).ToObject<Dictionary<string, object>>();
+                string caption = (string)jsonDict["Caption"];
+                string description = (string)jsonDict["JsonDescription"];
+                string location = (string)jsonDict["Location"];
+                ActivityLog log = new ActivityLog(caption, description, location);
+                Patient patient = GetPatientById(ctx, id);
+
+                patient.ActivityLogs.Add(log);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
             }
             return false;
         }

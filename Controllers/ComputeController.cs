@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using iris_server.Extensions;
 using iris_server.Services;
 using iris_server.Models;
+using Newtonsoft.Json.Linq;
 
 namespace iris_server.Controllers
 {
@@ -15,34 +16,88 @@ namespace iris_server.Controllers
         public ComputeController(DatabaseContext context) : base(context) { }
 
         // Analyse an image and return the predicted room and context aware prompt.
-        // ..api/feature/detectroom
+        // ..api/compute/detectroom
         [HttpGet]
         // [Authorize(Roles = "Patient")]
-        public async Task<IActionResult> DetectRoom([FromHeader(Name = "ApiKey")] string apiKey)
+        public async Task<IActionResult> DetectRoom([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")]string id)
         {
-            byte[] imageBytes = await Request.GetRawBodyBytesAsync();
-            return Ok("Endpoint works.");
+            try
+            {
+                bool authorised = PatientDatabaseAccess.MatchApiKeyWithId(_ctx, apiKey, id);
+                if (authorised)
+                {
+                    //byte[] imageBytes = await Request.GetRawBodyBytesAsync();
+                    //// Get azure labels
+                    //// Pass to detection service
+                    return Ok();
+                }
+                else
+                {
+                    return Unauthorized();
+                }
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
         }
 
 
         // Analyse an image and return annotations.
-        // ..api/feature/detectconfusion
+        // ..api/compute/detectconfusion
         [HttpGet]
         // [Authorize(Roles = "Patient")]
-        public async Task<IActionResult> DetectConfusion([FromHeader(Name = "ApiKey")] string apiKey)
+        public async Task<IActionResult> DetectConfusion([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")]string id)
         {
-            byte[] imageBytes = await Request.GetRawBodyBytesAsync();
-            return Ok("Endpoint works.");
+            try
+            {
+                bool authorised = PatientDatabaseAccess.MatchApiKeyWithId(_ctx, apiKey, id);
+                if (authorised)
+                {
+                    //byte[] imageBytes = await Request.GetRawBodyBytesAsync();
+                    //// Get azure labels
+                    //// Pass to detection service
+                    return Ok();
+                }
+                else
+                {
+                    return Unauthorized();
+                }
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
         }
 
 
         // Analyse an array of collection of transforms and return whether or not a fall occurred..
-        // ..api/feature/detectfall
+        // ..api/compute/detectfall
         [HttpGet]
         // [Authorize(Roles = "Patient")]
-        public bool DetectFall([FromBody] string transforms)
+        public async Task<IActionResult> DetectFall([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")]string id, [FromBody] JObject transforms)
         {
-            return DetectionService.DetectFall(transforms);
+            //return DetectionService.DetectFall(transforms);
+
+            try
+            {
+                bool authorised = PatientDatabaseAccess.MatchApiKeyWithId(_ctx, apiKey, id);
+                if (authorised)
+                {
+                    //byte[] imageBytes = await Request.GetRawBodyBytesAsync();
+                    //// Get azure labels
+                    //// Pass to detection service
+                    return Ok();
+                }
+                else
+                {
+                    return Unauthorized();
+                }
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
         }
     }
 }

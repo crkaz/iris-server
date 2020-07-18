@@ -7,6 +7,7 @@ using iris_server.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace iris_server.Controllers
 {
@@ -19,7 +20,7 @@ namespace iris_server.Controllers
         // Delete a user from the system, given their id.
         /// ..api/patient/delete?id=
         [HttpDelete]
-        [Authorize(Roles = "admin,formalcarer,informalcarer")]
+        [Authorize(Roles = "admin")]
         public IActionResult Delete([FromHeader(Name = "ApiKey")]string apiKey, [FromQuery(Name = "id")] string id)
         {
             try
@@ -157,5 +158,6 @@ namespace iris_server.Controllers
                 return BadRequest(e);
             }
         }
+
     }
 }

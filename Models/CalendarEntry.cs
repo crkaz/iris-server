@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,12 +14,12 @@ namespace iris_server.Models
         // DB fields.
         [Key] // Make primary key via EF convention.
         public string Id { get; set; } // Primary key.
-        public string CarerId { get; set; } // Foreign key.
+        public virtual Carer Carer { get; set; } // Foreign key.
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
         public Repetition Repeat { get; set; }
-        public String Description { get; set; }
-        public string JsonReminders { get; set; }
+        public string Description { get; set; }
+        public IList<string> Reminders { get; set; }
 
         [Timestamp] // Enable optimistic concurrency measures by timestamping transactions (EF convention).
         public byte[] RowVersion { get; set; }

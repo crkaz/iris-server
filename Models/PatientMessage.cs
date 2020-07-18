@@ -11,7 +11,7 @@ namespace iris_server.Models
         // DB fields.
         [Key] // Make primary key via EF convention.
         public string Id { get; set; } // Primary key.
-        public string CarerId { get; set; } // Foreign key.
+        public virtual Carer Carer { get; set; } // Foreign key.
         public DateTime Sent { get; set; }
         public DateTime? Read { get; set; }
         public string Title { get; set; }

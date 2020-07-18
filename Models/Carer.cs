@@ -13,9 +13,7 @@ namespace iris_server.Models
         [Key]
         public string Email { get; set; } // Primary Key
         public virtual User User { get; set; } // Foreign Key.
-
-        [NotMapped]
-        public string[] AssignedPatientIds { get; set; }
+        public IList<string> AssignedPatientIds { get; set; }
 
         public Carer() { }
     }
@@ -46,7 +44,7 @@ namespace iris_server.Models
             try
             {
                 Carer carer = GetCarerByApiKey(ctx, apiKey);
-                string[] assignedPatients = carer.AssignedPatientIds;
+                string[] assignedPatients = carer.AssignedPatientIds.ToArray<string>();
                 if (assignedPatients.Contains(id))
                 {
                     return true;

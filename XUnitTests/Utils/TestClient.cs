@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 
@@ -14,12 +15,12 @@ namespace XUnitTests.Utils
         private const string HOST = "http://localhost:54268/api/";
         private readonly HttpClient Client = new HttpClient();
 
-
         // Constructor
         public TestClient(string host = HOST)
         {
             Init(host);
         }
+
 
         private void Init(string host)
         {
@@ -34,12 +35,20 @@ namespace XUnitTests.Utils
                 var response = worker.GetAwaiter().GetResult();
                 worker.Wait();
             }
-            catch (HttpRequestException e)
+            catch (HttpRequestException)
             {
                 // Host unavailable.
                 throw new Exception("Connection refused. Please check that the host is online before running the tests.");
             }
         }
+
+
+        public void Destroy()
+        {
+            GC.Collect();
+            Client.Dispose();
+        }
+
 
         // GET
         public async Task<HttpResponseMessage> GetRequest(string endpoint, Dictionary<string, string> headers = null)
@@ -52,19 +61,21 @@ namespace XUnitTests.Utils
 
 
         // POST
-        public async Task<HttpResponseMessage> PostRequest(string endpoint, Dictionary<string, string> headers = null, HttpContent body = null)
+        public async Task<HttpResponseMessage> PostRequest(string endpoint, Dictionary<string, string> headers = null, string body = "")
         {
             AddHeaders(headers);
-            HttpResponseMessage response = await Client.PostAsync(endpoint, body);
+            StringContent bodyJson = new StringContent(body, Encoding.UTF8, "application/json");
+            HttpResponseMessage response = await Client.PostAsync(endpoint, bodyJson);
             return response;
         }
 
 
         // PUT
-        public async Task<HttpResponseMessage> PutRequest(string endpoint, Dictionary<string, string> headers = null, HttpContent body = null)
+        public async Task<HttpResponseMessage> PutRequest(string endpoint, Dictionary<string, string> headers = null, string body = "")
         {
             AddHeaders(headers);
-            HttpResponseMessage response = await Client.PutAsync(endpoint, body);
+            StringContent bodyJson = new StringContent(body, Encoding.UTF8, "application/json");
+            HttpResponseMessage response = await Client.PutAsync(endpoint, bodyJson);
             return response;
         }
 
@@ -77,9 +88,11 @@ namespace XUnitTests.Utils
             return response;
         }
 
+        /////////////////////
         //
         // Utility functions.
         //
+        /////////////////////
 
         /// <summary>
         /// Add a collection of headers to the request.

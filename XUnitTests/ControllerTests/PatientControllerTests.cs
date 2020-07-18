@@ -8,18 +8,14 @@ using System.Threading.Tasks;
 
 namespace XUnitTests
 {
-    /// <summary>
-    /// ENSURE SERVER IS RUNNING BEFORE EXECUTING TESTS.
-    /// HOST ADDRESS CAN BE CHANGED IN UTILS.TESTCLIENT.CS
-    /// </summary>
     public class PatientControllerTests
     {
-
+        /// <summary>
+        /// Test response for a request to GET an existing patient.
+        /// </summary>
         [Fact]
         public async Task GetPatientsOkRequest_Individiual()
         {
-            /// Test response for a request to GET an existing patient.
-
             // arrange
             TestClient testClient = new TestClient();
             const string endpoint = "patient/list/?id=testpatient";
@@ -37,13 +33,17 @@ namespace XUnitTests
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedPatientId, actualPatientId);
+
+            testClient.Destroy();
         }
 
+
+        /// <summary>
+        /// Test response for a request to GET an existing patient.
+        /// </summary>
         [Fact]
         public async Task GetPatientsOkRequest_Multiple()
         {
-            /// Test response for a request to GET an existing patient.
-
             // arrange
             TestClient testClient = new TestClient();
             const string endpoint = "patient/list/?id=testpatient&id=testpatient2";
@@ -65,13 +65,17 @@ namespace XUnitTests
             Assert.True(patients.Length == 2);
             Assert.Equal(expectedPatientId1, actualPatientId1);
             Assert.Equal(expectedPatientId2, actualPatientId2);
+
+            testClient.Destroy();
         }
 
+
+        /// <summary>
+        /// Test response for a request to GET a non-existent patient.
+        /// </summary>
         [Fact]
         public async Task GetPatientsBadRequest_NoPatient()
         {
-            /// Test response for a request to GET a non-existent patient.
-
             // arrange
             TestClient testClient = new TestClient();
             const string endpoint = "patient/list/?id=doesnotexist123";
@@ -84,13 +88,17 @@ namespace XUnitTests
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
+
+            testClient.Destroy();
         }
 
+
+        /// <summary>
+        /// Test response for a request to GET a patient not assigned to the requesting carer.
+        /// </summary>
         [Fact]
         public async Task GetPatientsUnauthorised()
         {
-            /// Test response for a request to GET a patient not assigned to the requesting carer.
-
             // arrange
             TestClient testClient = new TestClient();
             const string endpoint = "patient/list/?id=testpatient";
@@ -106,13 +114,17 @@ namespace XUnitTests
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedResponseBody, actualResponseBody);
+
+            testClient.Destroy();
         }
 
+
+        /// <summary>
+        /// Test response for a request to DELETE an existing patient.
+        /// </summary>
         [Fact]
         public async Task DeletePatientsOkRequest()
         {
-            /// Test response for a request to DELETE an existing patient.
-
             // arrange
             TestClient testClient = new TestClient();
             const string endpoint = "patient/delete/?id=testpatient";
@@ -125,13 +137,17 @@ namespace XUnitTests
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
+
+            testClient.Destroy();
         }
 
+
+        /// <summary>
+        /// Test response for a request to DELETE a non-existent patient.
+        /// </summary>
         [Fact]
         public async Task DeletePatientsUnauthorised_NoPatient()
         {
-            /// Test response for a request to DELETE a non-existent patient.
-
             // arrange
             TestClient testClient = new TestClient();
             const string endpoint = "patient/delete/?id=doesnotexist123";
@@ -144,13 +160,17 @@ namespace XUnitTests
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
+
+            testClient.Destroy();
         }
 
+
+        /// <summary>
+        /// Test response for a request to DELETE a patient not assigned to the requesting carer.
+        /// </summary>
         [Fact]
         public async Task DeletePatientsUnauthorised_NotAssigned()
         {
-            /// Test response for a request to DELETE a patient not assigned to the requesting carer.
-
             // arrange
             TestClient testClient = new TestClient();
             const string endpoint = "patient/delete/?id=testpatient";
@@ -166,13 +186,17 @@ namespace XUnitTests
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedResponseBody, actualResponseBody);
+
+            testClient.Destroy();
         }
 
+
+        /// <summary>
+        /// Test response for a request to GET status of an existing patient.
+        /// </summary>
         [Fact]
         public async Task GetPatientStatusOkRequest()
         {
-            /// Test response for a request to GET status of an existing patient.
-
             // arrange
             TestClient testClient = new TestClient();
             const string endpoint = "patient/status/?id=testpatient";
@@ -188,13 +212,17 @@ namespace XUnitTests
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedPatientStatus, actualPatientStatus);
+
+            testClient.Destroy();
         }
 
+
+        /// <summary>
+        /// Test response for a request to GET the status of a patient not assigned to the requesting carer.
+        /// </summary>
         [Fact]
         public async Task GetPatientStatusUnauthorised()
         {
-            /// Test response for a request to GET the status of a patient not assigned to the requesting carer.
-
             // arrange
             TestClient testClient = new TestClient();
             const string endpoint = "patient/status/?id=testpatient";
@@ -210,13 +238,17 @@ namespace XUnitTests
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedResponseBody, actualResponseBody);
+
+            testClient.Destroy();
         }
 
+
+        /// <summary>
+        /// Test response for a request to PUT the status of an existing patient.
+        /// </summary>
         [Fact]
         public async Task PutPatientStatusOkRequest()
         {
-            /// Test response for a request to PUT status of an existing patient.
-
             // arrange
             TestClient testClient = new TestClient();
             const string endpoint = "patient/status/?id=testpatient&status=offline";
@@ -232,13 +264,17 @@ namespace XUnitTests
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedPatientStatus, actualPatientStatus);
+
+            testClient.Destroy();
         }
 
+
+        /// <summary>
+        /// Test response for a request to PUT the status of a patient to an unrecognised status value.
+        /// </summary>
         [Fact]
         public async Task PutPatientStatusBadRequest_InvalidStatus()
         {
-            /// Test response for a request to PUT the status of a patient to an unrecognised status value.
-
             // arrange
             TestClient testClient = new TestClient();
             const string endpoint = "patient/status/?id=testpatient&status=AnInvalidStatus";
@@ -254,13 +290,16 @@ namespace XUnitTests
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedResponseBody, actualResponseBody);
+
+            testClient.Destroy();
         }
 
+        /// <summary>
+        /// Test response for a request to PUT the status of a patient not from a different patient.
+        /// </summary>
         [Fact]
         public async Task PutPatientStatusUnauthorised()
         {
-            /// Test response for a request to PUT the status of a patient not from a different patient.
-
             // arrange
             TestClient testClient = new TestClient();
             const string endpoint = "patient/status/?id=testpatient&status=offline";
@@ -276,6 +315,8 @@ namespace XUnitTests
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedResponseBody, actualResponseBody);
+
+            testClient.Destroy();
         }
     }
 }

@@ -13,15 +13,19 @@ namespace iris_server.Models
         public string Id { get; set; } // Primary key.
         public string What { get; set; }
         public DateTime When { get; set; }
+        public bool Test { get; set; }
+        public int ResponseCode { get; set; }
         [Timestamp]
         public byte[] RowVersion { get; set; }
 
         public DbLog() { }
 
-        public DbLog(string pWhat)
+        public DbLog(string what, int responseCode, bool testMode)
         {
-            this.What = pWhat;
+            this.What = what;
             this.When = DateTime.Now;
+            this.ResponseCode = responseCode;
+            this.Test = testMode;
         }
     }
 }

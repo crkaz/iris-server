@@ -14,7 +14,7 @@ namespace iris_server.Controllers
         [HttpGet]
         public IActionResult Check()
         {
-            return Ok("iris-server is online.");
+            return Ok("iris-server is online");
         }
     }
 }

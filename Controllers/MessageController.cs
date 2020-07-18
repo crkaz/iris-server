@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using iris_server.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -6,30 +8,30 @@ using Newtonsoft.Json.Linq;
 
 namespace iris_server.Controllers
 {
-    public class ConfigController : BaseController
+    public class MessageController : BaseController
     {
         /// Constructor injects the user context using dependency injection, via the BaseController. 
-        public ConfigController(DatabaseContext context) : base(context) { }
+        public MessageController(DatabaseContext context) : base(context) { }
 
 
-        // Modify a parameter of the patient's device configuration.
-        // ..api/config/put?id=
+        // Send a message to a patient.
+        // ..api/message/post?id=
         [Authorize(Roles = "admin,formalcarer,informalcarer")]
-        public IActionResult Put([FromHeader(Name = "ApiKey")]string apiKey, [FromQuery(Name = "id")] string id, [FromBody] JObject configJson)
+        public IActionResult Post([FromHeader(Name = "ApiKey")]string apiKey, [FromQuery(Name = "id")] string id, [FromBody] JObject titleAndMessage)
         {
             try
             {
                 bool patientAssignedToThisCarer = CarerDatabaseAccess.PatientIsAssigned(_ctx, apiKey, id);
                 if (patientAssignedToThisCarer)
                 {
-                    bool success = PatientDatabaseAccess.UpdatePatientConfig(_ctx, id, configJson);
+                    bool success = PatientDatabaseAccess.MessagePatient(_ctx, apiKey, id, titleAndMessage);
                     if (success)
                     {
-                        return Ok("Updated patient successfully.");
+                        return Ok("Message sent successfully.");
                     }
                     else
                     {
-                        return BadRequest("Failed to update the patient.");
+                        return BadRequest("Failed to send message.");
                     }
                 }
                 else
@@ -44,22 +46,26 @@ namespace iris_server.Controllers
         }
 
 
-        // Get the patient's device configuration.
-        // ..api/config/get?id=
-        [Authorize(Roles = "admin,formalcarer,informalcarer")]
+        // Get a patients unread messages.
+        // ..api/message/get?id=
+        [Authorize(Roles = "patient")]
         public IActionResult Get([FromHeader(Name = "ApiKey")]string apiKey, [FromQuery(Name = "id")] string id)
         {
             try
             {
-                bool patientAssignedToThisCarer = CarerDatabaseAccess.PatientIsAssigned(_ctx, apiKey, id);
-                if (patientAssignedToThisCarer)
+                bool authorised = PatientDatabaseAccess.MatchApiKeyWithId(_ctx, apiKey, id);
+
+                if (authorised)
                 {
-                    Patient patient = PatientDatabaseAccess.GetPatientById(_ctx, id);
-                    return Ok(patient.Config);
+                    Patient patient = PatientDatabaseAccess.GetPatientByApiKey(_ctx, apiKey);
+
+                    // Get unread messages.
+                    IEnumerable<PatientMessage> unreadMessages = patient.Messages.Where(message => message.Read == null);
+                    return Ok(unreadMessages);
                 }
                 else
                 {
-                    return Unauthorized("You are not assigned to this patient.");
+                    return Unauthorized("Credentials do not match.");
                 }
             }
             catch (Exception e)

@@ -1,6 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using iris_server.Models.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 
 namespace iris_server.Models
 {
@@ -27,14 +30,36 @@ namespace iris_server.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            var converter = new ValueConverter<string[], string>(
+            #region Converters
+            // Cannot store complex types in database. These converters managage the conversion to and from.
+
+            var stringArrayConverter = new ValueConverter<IList<string>, string>(
                 v => v.ToString(),
                 v => v.Split(',', StringSplitOptions.None));
 
+            ValueConverter featuresConverter = new ValueConverter<IList<IFeature>, string>(
+                 v => JsonConvert.SerializeObject(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }),
+                 v => JsonConvert.DeserializeObject<IList<IFeature>>(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
+
+            #endregion
+
+            // Assigned patient ids in carer model.
             modelBuilder
                 .Entity<Carer>()
                 .Property(e => e.AssignedPatientIds)
-                .HasConversion(converter);
+                .HasConversion(stringArrayConverter);
+
+            //  Reminders in calendar model.
+            modelBuilder
+                .Entity<CalendarEntry>()
+                .Property(e => e.Reminders)
+                .HasConversion(stringArrayConverter);
+
+            // Features in patientconfig model.
+            modelBuilder
+                .Entity<PatientConfig>()
+                .Property(e => e.EnabledFeatures)
+                .HasConversion(featuresConverter);
         }
     }
 }

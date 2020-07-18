@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using iris_server.Models;
+using Newtonsoft.Json.Linq;
 
 namespace iris_server.Controllers
 {
@@ -16,10 +17,8 @@ namespace iris_server.Controllers
 
         // Add a new calender entry to the patient's calendar.
         // ..api/patient/calendar?id=
-        [HttpPost]
-        [ActionName("calendar")]
-        // [Authorize(Roles = "Admin,Carer")]
-        public IActionResult CalendarPost([FromQuery(Name = "id")] string id, [FromBody] string calendarEntry)
+        [Authorize(Roles = "admin,formalcarer,informalcarer")]
+        public IActionResult Post([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromBody] JObject calendarJson)
         {
             return Ok("Endpoint works.");
         }
@@ -27,10 +26,8 @@ namespace iris_server.Controllers
 
         // Edit a calender entry given its id.
         // ..api/patient/calendar?id=
-        [HttpPut]
-        [ActionName("calendar")]
-        // [Authorize(Roles = "Admin,Carer")]
-        public IActionResult CalendarPut([FromQuery(Name = "id")] string id, [FromBody] string calendarEntry)
+        [Authorize(Roles = "admin,formalcarer,informalcarer")]
+        public IActionResult Put([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromBody] JObject calendarJson)
         {
             return Ok("Endpoint works.");
         }
@@ -38,22 +35,20 @@ namespace iris_server.Controllers
 
         // Delete a calender entry given its id.
         // ..api/patient/calendar?id=
-        [HttpDelete]
-        [ActionName("calendar")]
-        // [Authorize(Roles = "Admin,Carer")]
-        public IActionResult CalendarDelete([FromQuery(Name = "id")] string id)
+        [Authorize(Roles = "admin,formalcarer,informalcarer")]
+        public IActionResult Delete([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
         {
             return Ok("Endpoint works.");
         }
 
 
-        // Delete a calender entry given its id.
+        // Get all calender entries from a given date until the future.
         // ..api/patient/calendar?id=..&date=
         [HttpGet]
-        [ActionName("calendar")]
-        // [Authorize(Roles = "Admin,Carer,Patient")]
-        public IActionResult CalendarGet([FromQuery(Name = "id")] string id, [FromQuery(Name = "date")] string date)
+        [Authorize(Roles = "admin,formalcarer,informalcarer,patient")]
+        public IActionResult Get([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromQuery(Name = "date")] string date)
         {
+            // apikey must match patient associated with the id OR a carer assigned to the patient with that id.
             return Ok("Endpoint works.");
         }
     }
