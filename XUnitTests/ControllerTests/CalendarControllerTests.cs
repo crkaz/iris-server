@@ -5,7 +5,9 @@ using Newtonsoft.Json;
 using iris_server.Models;
 using XUnitTests.Utils;
 using System.Threading.Tasks;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace XUnitTests
 {
@@ -15,24 +17,20 @@ namespace XUnitTests
         public async Task PostCalendarOkRequest()
         {
             // arrange
-            
             const string endpoint = "calendar/post/?id=testpatient";
-            const string expectedPatientId = "testpatient";
+            string requestBody = JsonConvert.SerializeObject(new CalendarEntry() { Start = DateTime.Now.AddDays(1), End = DateTime.Now.AddDays(2)});
             const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
+            const string expectedResponse = "Successfully added calendar entry.";
             TestClient.Instance.AddHeader("ApiKey", "testcarer");
 
             // act
-            HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
-            Patient[] patient = JsonConvert.DeserializeObject<Patient[]>(responseContentJson);
-            string actualPatientId = patient[0].Id;
+            HttpResponseMessage response = await TestClient.Instance.PostRequest(endpoint, body: requestBody);
+            string actualResponse = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedPatientId, actualPatientId);
-
-            
+            Assert.Equal(expectedResponse, actualResponse);
         }
 
 
@@ -41,24 +39,42 @@ namespace XUnitTests
         public async Task PostCalendarBadRequest()
         {
             // arrange
-            
             const string endpoint = "calendar/post/?id=testpatient";
-            const string expectedPatientId = "testpatient";
+            string requestBody = JsonConvert.SerializeObject(new CalendarEntry() { Start = DateTime.Now.AddDays(-2), End = DateTime.Now.AddDays(-1)});
             const HttpStatusCode expectedStatusCode = HttpStatusCode.BadRequest;
+            const string expectedResponse = "Invalid start date.";
             TestClient.Instance.AddHeader("ApiKey", "testcarer");
 
             // act
-            HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
-            Patient[] patient = JsonConvert.DeserializeObject<Patient[]>(responseContentJson);
-            string actualPatientId = patient[0].Id;
+            HttpResponseMessage response = await TestClient.Instance.PostRequest(endpoint, body: requestBody);
+            string actualResponse = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedPatientId, actualPatientId);
+            Assert.Equal(expectedResponse, actualResponse);
+        }
 
-            
+
+        // Start date must be before end date.
+        [Fact]
+        public async Task PostCalendarBadRequest_EndBeforeStart()
+        {
+            // arrange
+            const string endpoint = "calendar/post/?id=testpatient";
+            string requestBody = JsonConvert.SerializeObject(new CalendarEntry() { Start = DateTime.Now, End = DateTime.Now.AddDays(-1)});
+            const HttpStatusCode expectedStatusCode = HttpStatusCode.BadRequest;
+            const string expectedResponse = "Invalid start date.";
+            TestClient.Instance.AddHeader("ApiKey", "testcarer");
+
+            // act
+            HttpResponseMessage response = await TestClient.Instance.PostRequest(endpoint, body: requestBody);
+            string actualResponse = await response.Content.ReadAsStringAsync();
+            HttpStatusCode actualStatusCode = response.StatusCode;
+
+            // assert
+            Assert.Equal(expectedStatusCode, actualStatusCode);
+            Assert.Equal(expectedResponse, actualResponse);
         }
 
 
@@ -67,24 +83,20 @@ namespace XUnitTests
         public async Task PostCalendarUnauthorised()
         {
             // arrange
-            
             const string endpoint = "calendar/post/?id=testpatient";
-            const string expectedPatientId = "testpatient";
+            string requestBody = JsonConvert.SerializeObject(new CalendarEntry() { Start = DateTime.Now.AddDays(1), End = DateTime.Now.AddDays(2)});
             const HttpStatusCode expectedStatusCode = HttpStatusCode.Unauthorized;
-            TestClient.Instance.AddHeader("ApiKey", "testcarer");
+            const string expectedResponse = "You are not assigned to this patient.";
+            TestClient.Instance.AddHeader("ApiKey", "testcarer_nopatients");
 
             // act
-            HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
-            Patient[] patient = JsonConvert.DeserializeObject<Patient[]>(responseContentJson);
-            string actualPatientId = patient[0].Id;
+            HttpResponseMessage response = await TestClient.Instance.PostRequest(endpoint, body: requestBody);
+            string actualResponse = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedPatientId, actualPatientId);
-
-            
+            Assert.Equal(expectedResponse, actualResponse);
         }
 
 
@@ -92,24 +104,20 @@ namespace XUnitTests
         public async Task PutCalendarOkRequest()
         {
             // arrange
-            
-            const string endpoint = "calendar/put/?id=testpatient";
-            const string expectedPatientId = "testpatient";
+            const string endpoint = "calendar/put/?id=testcalendar";
+            string requestBody = JsonConvert.SerializeObject(new CalendarEntry() { Start = DateTime.Now.AddDays(1), End = DateTime.Now.AddDays(2)});
             const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
+            const string expectedResponse = "Calendar entry updated successfully.";
             TestClient.Instance.AddHeader("ApiKey", "testcarer");
 
             // act
-            HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
-            Patient[] patient = JsonConvert.DeserializeObject<Patient[]>(responseContentJson);
-            string actualPatientId = patient[0].Id;
+            HttpResponseMessage response = await TestClient.Instance.PutRequest(endpoint, body: requestBody);
+            string actualResponse = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedPatientId, actualPatientId);
-
-            
+            Assert.Equal(expectedResponse, actualResponse);
         }
 
 
@@ -118,24 +126,42 @@ namespace XUnitTests
         public async Task PutCalendarBadRequest()
         {
             // arrange
-            
-            const string endpoint = "calendar/put/?id=testpatient";
-            const string expectedPatientId = "testpatient";
+            const string endpoint = "calendar/put/?id=testcalendar";
+            string requestBody = JsonConvert.SerializeObject(new CalendarEntry() { Start = DateTime.Now.AddDays(-5) });
             const HttpStatusCode expectedStatusCode = HttpStatusCode.BadRequest;
+            const string expectedResponse = "Invalid start date.";
             TestClient.Instance.AddHeader("ApiKey", "testcarer");
 
             // act
-            HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
-            Patient[] patient = JsonConvert.DeserializeObject<Patient[]>(responseContentJson);
-            string actualPatientId = patient[0].Id;
+            HttpResponseMessage response = await TestClient.Instance.PutRequest(endpoint, body: requestBody);
+            string actualResponse = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedPatientId, actualPatientId);
+            Assert.Equal(expectedResponse, actualResponse);
+        }
 
-            
+
+        // Cannot edit date to be in the past.
+        [Fact]
+        public async Task PutCalendarBadRequest_EndBeforeStart()
+        {
+            // arrange
+            const string endpoint = "calendar/put/?id=testcalendar";
+            string requestBody = JsonConvert.SerializeObject(new CalendarEntry() { Start = DateTime.Now.AddDays(-5) });
+            const HttpStatusCode expectedStatusCode = HttpStatusCode.BadRequest;
+            const string expectedResponse = "Invalid start date.";
+            TestClient.Instance.AddHeader("ApiKey", "testcarer");
+
+            // act
+            HttpResponseMessage response = await TestClient.Instance.PutRequest(endpoint, body: requestBody);
+            string actualResponse = await response.Content.ReadAsStringAsync();
+            HttpStatusCode actualStatusCode = response.StatusCode;
+
+            // assert
+            Assert.Equal(expectedStatusCode, actualStatusCode);
+            Assert.Equal(expectedResponse, actualResponse);
         }
 
 
@@ -144,24 +170,20 @@ namespace XUnitTests
         public async Task PutCalendarUnauthorised()
         {
             // arrange
-            
-            const string endpoint = "calendar/put/?id=testpatient";
-            const string expectedPatientId = "testpatient";
+            const string endpoint = "calendar/put/?id=testcalendar";
+            string requestBody = JsonConvert.SerializeObject(new CalendarEntry() { Start = DateTime.Now.AddDays(-1) });
             const HttpStatusCode expectedStatusCode = HttpStatusCode.Unauthorized;
-            TestClient.Instance.AddHeader("ApiKey", "testcarer");
+            const string expectedResponse = "You are not assigned to this patient.";
+            TestClient.Instance.AddHeader("ApiKey", "testcarer_nopatients");
 
             // act
-            HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
-            Patient[] patient = JsonConvert.DeserializeObject<Patient[]>(responseContentJson);
-            string actualPatientId = patient[0].Id;
+            HttpResponseMessage response = await TestClient.Instance.PutRequest(endpoint, body: requestBody);
+            string actualResponse = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedPatientId, actualPatientId);
-
-            
+            Assert.Equal(expectedResponse, actualResponse);
         }
 
 
@@ -170,24 +192,20 @@ namespace XUnitTests
         public async Task PutCalendarNotFound()
         {
             // arrange
-            
-            const string endpoint = "calendar/put/?id=testpatient";
-            const string expectedPatientId = "testpatient";
+            const string endpoint = "calendar/put/?id=thisdoesntexist";
+            string requestBody = JsonConvert.SerializeObject(new CalendarEntry() { Start = DateTime.Now.AddDays(-1) });
             const HttpStatusCode expectedStatusCode = HttpStatusCode.NotFound;
+            const string expectedResponse = "Could not find an entry with that id.";
             TestClient.Instance.AddHeader("ApiKey", "testcarer");
 
             // act
-            HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
-            Patient[] patient = JsonConvert.DeserializeObject<Patient[]>(responseContentJson);
-            string actualPatientId = patient[0].Id;
+            HttpResponseMessage response = await TestClient.Instance.PutRequest(endpoint, body: requestBody);
+            string actualResponse = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedPatientId, actualPatientId);
-
-            
+            Assert.Equal(expectedResponse, actualResponse);
         }
 
 
@@ -195,24 +213,19 @@ namespace XUnitTests
         public async Task DeleteCalendarOkRequest()
         {
             // arrange
-            
-            const string endpoint = "calendar/delete/?id=testpatient";
-            const string expectedPatientId = "testpatient";
+            const string endpoint = "calendar/delete/?id=testcalendar";
             const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
+            const string expectedResponse = "Calendar entry deleted successfully.";
             TestClient.Instance.AddHeader("ApiKey", "testcarer");
 
             // act
-            HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
-            Patient[] patient = JsonConvert.DeserializeObject<Patient[]>(responseContentJson);
-            string actualPatientId = patient[0].Id;
+            HttpResponseMessage response = await TestClient.Instance.DeleteRequest(endpoint);
+            string actualResponse = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedPatientId, actualPatientId);
-
-            
+            Assert.Equal(expectedResponse, actualResponse);
         }
 
 
@@ -221,50 +234,40 @@ namespace XUnitTests
         public async Task DeleteCalendarUnauthorised()
         {
             // arrange
-            
-            const string endpoint = "calendar/delete/?id=testpatient";
-            const string expectedPatientId = "testpatient";
+            const string endpoint = "calendar/delete/?id=testcalendar";
             const HttpStatusCode expectedStatusCode = HttpStatusCode.Unauthorized;
-            TestClient.Instance.AddHeader("ApiKey", "testcarer");
+            const string expectedResponse = "You are not assigned to this patient.";
+            TestClient.Instance.AddHeader("ApiKey", "testcarer_nopatients");
 
             // act
-            HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
-            Patient[] patient = JsonConvert.DeserializeObject<Patient[]>(responseContentJson);
-            string actualPatientId = patient[0].Id;
+            HttpResponseMessage response = await TestClient.Instance.DeleteRequest(endpoint);
+            string actualResponse = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedPatientId, actualPatientId);
-
-            
+            Assert.Equal(expectedResponse, actualResponse);
         }
 
 
-        // Cannot delte a calendar entry that doesn't exist.
+        // Cannot delete a calendar entry that doesn't exist.
         [Fact]
         public async Task DeleteCalendarNotFound()
         {
             // arrange
-            
-            const string endpoint = "calendar/delete/?id=testpatient";
-            const string expectedPatientId = "testpatient";
+            const string endpoint = "calendar/delete/?id=thisdoesntexist";
             const HttpStatusCode expectedStatusCode = HttpStatusCode.NotFound;
-            TestClient.Instance.AddHeader("ApiKey", "testcarer");
+            const string expectedResponse = "Could not find an entry with that id.";
+            TestClient.Instance.AddHeader("ApiKey", "testcarer_nopatients");
 
             // act
-            HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
-            Patient[] patient = JsonConvert.DeserializeObject<Patient[]>(responseContentJson);
-            string actualPatientId = patient[0].Id;
+            HttpResponseMessage response = await TestClient.Instance.DeleteRequest(endpoint);
+            string actualResponse = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedPatientId, actualPatientId);
-
-            
+            Assert.Equal(expectedResponse, actualResponse);
         }
 
 
@@ -273,99 +276,106 @@ namespace XUnitTests
         public async Task GetCalendarOkRequest_Patient()
         {
             // arrange
-            
-            const string endpoint = "calendar/delete/?id=testpatient";
-            const string expectedPatientId = "testpatient";
+            const string endpoint = "calendar/get/";
             const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
-            TestClient.Instance.AddHeader("ApiKey", "testcarer");
+            TestClient.Instance.AddHeader("ApiKey", "testpatient");
 
             // act
             HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
-            Patient[] patient = JsonConvert.DeserializeObject<Patient[]>(responseContentJson);
-            string actualPatientId = patient[0].Id;
+            string responseBody = await response.Content.ReadAsStringAsync();
+            ICollection<CalendarEntry> entries = JsonConvert.DeserializeObject<ICollection<CalendarEntry>>(responseBody);
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedPatientId, actualPatientId);
-
-            
+            Assert.True(entries.Count > 0);
         }
 
-        // Carer should be able to see all appointments for current day and into the future.
+
+        // Carer should be able to get all appointments from today onwards in a paginated fashion.
         [Fact]
-        public async Task GetCalendarOkRequest_Carer()
+        public async Task GetActivityLogsOkRequest_HasLogs()
         {
             // arrange
-            
-            const string endpoint = "calendar/delete/?id=testpatient";
-            const string expectedPatientId = "testpatient";
+            const string endpoint = "calendar/get/?id=testpatient&page=1&nitems=5";
             const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
             TestClient.Instance.AddHeader("ApiKey", "testcarer");
 
             // act
             HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
-            Patient[] patient = JsonConvert.DeserializeObject<Patient[]>(responseContentJson);
-            string actualPatientId = patient[0].Id;
+            string responseBody = await response.Content.ReadAsStringAsync();
+            ICollection<CalendarEntry> entries = JsonConvert.DeserializeObject<ICollection<CalendarEntry>>(responseBody);
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedPatientId, actualPatientId);
-
-            
+            Assert.True(entries.Count > 0);
         }
 
-        // Patient cannot get another patient's calendar.
+
+        // Negative pagination is ignored; arguments are treating in absolute terms.
         [Fact]
-        public async Task GetCalendarUnauthorised_Patient()
+        public async Task GetActivityLogsOkRequest_NegativePagination()
         {
             // arrange
-            
-            const string endpoint = "calendar/delete/?id=testpatient";
-            const string expectedPatientId = "testpatient";
+            const string endpoint = "calendar/get/?id=testpatient&page=1&nitems=-5";
             const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
             TestClient.Instance.AddHeader("ApiKey", "testcarer");
 
             // act
             HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
-            Patient[] patient = JsonConvert.DeserializeObject<Patient[]>(responseContentJson);
-            string actualPatientId = patient[0].Id;
+            string responseBody = await response.Content.ReadAsStringAsync();
+            ICollection<CalendarEntry> entries = JsonConvert.DeserializeObject<ICollection<CalendarEntry>>(responseBody);
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedPatientId, actualPatientId);
-
-            
+            Assert.True(entries.Count > 0);
         }
+
+
+        // The get request should handle the scenario where no calendar entries exist for a patient.
+        [Fact]
+        public async Task GetActivityLogsOkRequest_HasNoLogs()
+        {
+            // arrange
+            const string endpoint = "calendar/get/?id=testpatient2&page=1&nitems=-5";
+            const int expectedNumberOfEntries = 0;
+            const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
+            TestClient.Instance.AddHeader("ApiKey", "testcarer");
+
+            // act
+            HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
+            string responseBody = await response.Content.ReadAsStringAsync();
+            ICollection<CalendarEntry> entries = JsonConvert.DeserializeObject<ICollection<CalendarEntry>>(responseBody);
+            HttpStatusCode actualStatusCode = response.StatusCode;
+
+            // assert
+            Assert.Equal(expectedStatusCode, actualStatusCode);
+            Assert.Equal(expectedNumberOfEntries, entries.Count);
+        }
+
 
         // A carer can only view appointments if they are assigned to the patient.
         [Fact]
-        public async Task GetCalendarUnauthorised_Carer()
+        public async Task GetCalendarUnauthorised()
         {
             // arrange
-            
-            const string endpoint = "calendar/delete/?id=testpatient";
-            const string expectedPatientId = "testpatient";
-            const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
-            TestClient.Instance.AddHeader("ApiKey", "testcarer");
+            const string endpoint = "calendar/get/?id=testpatient";
+            const HttpStatusCode expectedStatusCode = HttpStatusCode.Unauthorized;
+            const string expectedResponse = "You are not assigned to that patient.";
+            TestClient.Instance.AddHeader("ApiKey", "testcarer_nopatients");
 
             // act
             HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
-            Patient[] patient = JsonConvert.DeserializeObject<Patient[]>(responseContentJson);
-            string actualPatientId = patient[0].Id;
+            string actualResponse = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedPatientId, actualPatientId);
-
-            
+            Assert.Equal(expectedResponse, actualResponse);
         }
+
+
     }
 }

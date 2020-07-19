@@ -1,8 +1,10 @@
 ﻿using iris_server.Models;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -418,5 +420,101 @@ namespace iris_server.Services
             return false; // NOT IMPLEMENTED.
         }
 
+
+        public static async Task<bool> AddCalendarEntry(DatabaseContext ctx, string carerApiKey, string patientId, Dictionary<string, object> jsonDict)
+        {
+            try
+            {
+                DateTime start = (DateTime)jsonDict["Start"];
+                DateTime end = (DateTime)jsonDict["End"];
+                int repetition = (int)(long)jsonDict["Repeat"];
+                string description = (string)jsonDict["Description"];
+                IList<string> reminders = (IList<string>)jsonDict["Reminders"];
+                Carer carer = GetCarerByApiKey(ctx, carerApiKey);
+                Patient patient = await GetPatientById(ctx, patientId);
+                CalendarEntry entry = new CalendarEntry() { Carer = carer, Description = description, End = end, Start = start, Repeat = (CalendarEntry.Repetition)repetition, Reminders = reminders };
+                patient.CalendarEntries.Add(entry);
+                await ctx.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return false;
+        }
+
+
+        public static async Task<CalendarEntry> GetCalendarEntryById(DatabaseContext ctx, string entryId)
+        {
+            try
+            {
+                CalendarEntry entry = ctx.Calendars.Find(entryId);
+                if (entry != null)
+                {
+                    return entry;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return null;
+        }
+
+
+        public static async Task<bool> UpdateCalendarEntry(DatabaseContext ctx, string calendarId, Dictionary<string, object> jsonDict)
+        {
+            try
+            {
+                CalendarEntry entry = await ctx.Calendars.FindAsync(calendarId);
+                bool changes = false;
+
+                foreach (string key in jsonDict.Keys)
+                {
+                    switch (key.ToLower())
+                    {
+                        case "start":
+                            DateTime start = (DateTime)jsonDict["Start"];
+                            entry.Start = start;
+                            changes = true;
+                            break;
+                        case "end":
+                            DateTime end = (DateTime)jsonDict["End"];
+                            entry.End = end;
+                            changes = true;
+                            break;
+                        case "repeat":
+                            int repetition = (int)(long)jsonDict["Repeat"];
+                            entry.Repeat = (CalendarEntry.Repetition)repetition;
+                            changes = true;
+                            break;
+                        case "description":
+                            string description = (string)jsonDict["Description"];
+                            entry.Description = description;
+                            changes = true;
+                            break;
+                        case "reminders":
+                            IList<string> reminders = (IList<string>)jsonDict["Reminders"];
+                            entry.Reminders = reminders;
+                            changes = true;
+                            break;
+                    }
+                }
+
+                if (changes)
+                {
+                    await ctx.SaveChangesAsync();
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
+        }
     }
 }
