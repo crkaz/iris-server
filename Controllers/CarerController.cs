@@ -121,7 +121,7 @@ namespace iris_server.Controllers
                     bool notDeletingSelf = !DbService.MatchCarerApiKeyWithId(_ctx, apiKey, id).GetAwaiter().GetResult();
                     if (notDeletingSelf)
                     {
-                        bool success = DbService.DeleteCarer(_ctx, id).GetAwaiter().GetResult();
+                        bool success = DbService.DeleteCarerById(_ctx, id).GetAwaiter().GetResult();
                         if (success)
                         {
                             return Ok("Carer deleted successfully.");

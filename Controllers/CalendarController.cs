@@ -117,28 +117,78 @@ namespace iris_server.Controllers
         [Authorize(Roles = "admin,formalcarer,informalcarer")]
         public IActionResult Delete([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
         {
-            return Ok("Endpoint works.");
+            try
+            {
+                bool entryExists = DbService.GetCalendarEntryById(_ctx, id).GetAwaiter().GetResult() != null;
+                if (entryExists)
+                {
+                    bool success = DbService.DeleteCalendarEntryById(_ctx, id).GetAwaiter().GetResult();
+                    if (success)
+                    {
+                        return Ok("Calendar entry deleted successfully.");
+                    }
+                    else
+                    {
+                        return BadRequest("Failed to delete carer.");
+                    }
+                }
+                else
+                {
+                    return NotFound("Could not find an entry with that id.");
+                }
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
         }
 
 
         // Get all future calender entries for a patient between todays date.
         // ..api/patient/calendar?id=..&date=
+        [HttpGet]
         [Authorize(Roles = "admin,formalcarer,informalcarer,patient")]
-        public IActionResult Get([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromQuery(Name = "page")] string page, [FromQuery(Name = "nitems")] string nItems)
+        public IActionResult CarerGet([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromQuery(Name = "page")] string page, [FromQuery(Name = "nitems")] string nItems)
         {
-            // apikey must match patient associated with the id OR a carer assigned to the patient with that id.
-            return Ok("Endpoint works.");
+            try
+            {
+                bool patientAssignedToCarer = DbService.PatientIsAssigned(_ctx, apiKey, id);
+                if (patientAssignedToCarer)
+                {
+                    ICollection<CalendarEntry> entries = DbService.GetCalendarEntries(_ctx, id, page, nItems).GetAwaiter().GetResult();
+                    string entriesJson = JsonConvert.SerializeObject(entries);
+                    return Ok(entriesJson);
+                }
+                else
+                {
+                    return Unauthorized("You are not assigned to this patient.");
+                }
+                // Return logs as a paginated json collection
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
         }
 
 
         // Get all calender entries from 'today' and 'tomorrow'.
         // ..api/patient/calendar?id=..&date=
-        [HttpPost]
+        [HttpGet]
         [Authorize(Roles = "patient")]
-        public IActionResult Get([FromHeader(Name = "ApiKey")] string apiKey)
+        public IActionResult PatientGet([FromHeader(Name = "ApiKey")] string apiKey)
         {
-            // apikey must match patient associated with the id OR a carer assigned to the patient with that id.
-            return Ok("Endpoint works.");
+            try
+            {
+                ICollection<CalendarEntry> entries = DbService.GetCalendarEntries(_ctx, apiKey);
+                string entriesJson = JsonConvert.SerializeObject(entries);
+                return Ok(entriesJson);
+                // Return logs as a paginated json collection
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
         }
     }
 }

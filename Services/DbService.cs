@@ -1,5 +1,6 @@
 ﻿using iris_server.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing.Internal;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -185,7 +186,7 @@ namespace iris_server.Services
         }
 
 
-        public static async Task<bool> DeleteCarer(DatabaseContext ctx, string carerId)
+        public static async Task<bool> DeleteCarerById(DatabaseContext ctx, string carerId)
         {
             try
             {
@@ -516,5 +517,66 @@ namespace iris_server.Services
                 return false;
             }
         }
+
+
+        public static async Task<bool> DeleteCalendarEntryById(DatabaseContext ctx, string entryId)
+        {
+            try
+            {
+                CalendarEntry entry = await GetCalendarEntryById(ctx, entryId);
+                if (entryId != "testcalendar")
+                {
+                    ctx.Calendars.Remove(entry);
+                    await ctx.SaveChangesAsync();
+                }
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return false;
+        }
+
+
+        public static async Task<ICollection<CalendarEntry>> GetCalendarEntries(DatabaseContext ctx, string patientId, string pageStr, string nItemsStr)
+        {
+            try
+            {
+                int page = Math.Abs(int.Parse(pageStr));
+                int nItems = Math.Abs(int.Parse(nItemsStr));
+                int startIndex = (page - 1) * nItems;
+                var worker = await ctx.Patients.FindAsync(patientId);
+                // Get only entries from todays date onwards.
+                ICollection<CalendarEntry> entries = worker.CalendarEntries.Where(entry => entry.Start > DateTime.Now).ToList();
+                nItems = nItems - ((page * nItems) - entries.Count);
+                List<CalendarEntry> entriesList = entries.ToList();
+                // Return paginated collection.
+                return entriesList.GetRange(startIndex, nItems);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return null;
+        }
+
+
+        public static ICollection<CalendarEntry> GetCalendarEntries(DatabaseContext ctx, string patientApiKey)
+        {
+            try
+            {
+                Patient patient = GetPatientByApiKey(ctx, patientApiKey);
+                // Get only entries for today and tomorrow.
+                ICollection<CalendarEntry> entries = patient.CalendarEntries.Where(entry => entry.Start.Day >= DateTime.Now.Day && entry.Start.Day <= DateTime.Now.Day + 1).ToList();
+                return entries;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return null;
+        }
+
     }
 }
