@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using iris_server.Models;
 using iris_server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace iris_server.Controllers
 {
@@ -130,7 +130,7 @@ namespace iris_server.Controllers
         {
             try
             {
-                Patient patient = (Patient)DbService.GetEntityByForiegnKey(_ctx, apiKey, DbService.Collection.patients);
+                Patient patient = (Patient)DbService.GetEntityByForeignKey(_ctx, apiKey, DbService.Collection.patients);
                 if (patient.Id == id)
                 {
                     string[] enumNames = Enum.GetNames(typeof(Patient.PatientStatus));
@@ -159,6 +159,7 @@ namespace iris_server.Controllers
 
         // Get the paginated logs of a patient.
         // ..api/patient/logs/?id=..&page=..&nitems=
+        [HttpGet]
         [Authorize(Roles = "admin,formalcarer,informalcarer")]
         public IActionResult Logs([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromQuery(Name = "page")] string page, [FromQuery(Name = "nitems")] string nItems)
         {
@@ -177,6 +178,31 @@ namespace iris_server.Controllers
                     return Unauthorized("You are not assigned to this patient.");
                 }
                 // Return logs as a paginated json collection
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
+
+
+        // Create a new activity log.
+        // ..api/patient/logs/
+        [HttpPost]
+        [Authorize(Roles = "patient")]
+        public IActionResult Logs([FromHeader(Name = "ApiKey")] string apiKey, [FromBody] JObject logJson)
+        {
+            try
+            {
+                bool success = DbService.CreatePatientActivityLog(_ctx, apiKey, logJson).GetAwaiter().GetResult();
+                if (success)
+                {
+                    return Ok("Logged successfully.");
+                }
+                else
+                {
+                    return BadRequest("Logging failed.");
+                }
             }
             catch (Exception e)
             {

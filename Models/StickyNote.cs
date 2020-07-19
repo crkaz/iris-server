@@ -11,7 +11,7 @@ namespace iris_server.Models
         [ForeignKey("PatientId")]
         public string PatientId { get; set; }
         public string Content { get; set; }
-        public int Scale { get; set; }
+        public float Scale { get; set; }
 
         public StickyNote() { }
     }

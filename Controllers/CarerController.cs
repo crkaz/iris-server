@@ -1,13 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using iris_server.Models;
-using Newtonsoft.Json.Linq;
-using Microsoft.AspNetCore.Rewrite.Internal;
 using System;
-using System.Collections.Generic;
 using Newtonsoft.Json;
-using Remotion.Linq.Utilities;
-using System.Threading.Tasks;
 using iris_server.Services;
 
 namespace iris_server.Controllers
@@ -40,7 +35,7 @@ namespace iris_server.Controllers
                     }
                     else
                     {
-                        bool success = DbService.CreateCarer(_ctx, email).GetAwaiter().GetResult();
+                        bool success = DbService.CreateUser(_ctx, email, Models.User.UserRole.informalcarer).GetAwaiter().GetResult();
                         if (success)
                         {
                             return Ok("New carer added successfully.");

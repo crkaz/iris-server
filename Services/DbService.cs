@@ -11,34 +11,7 @@ namespace iris_server.Services
 {
     public static class DbService
     {
-        public enum Collection { users, patients, carers, calendars, };
-
-
-        public static async Task<bool> LookupPrimaryKey(DatabaseContext ctx, string key, Collection collection)
-        {
-            try
-            {
-                switch (collection)
-                {
-                    case Collection.users:
-                        return await ctx.Users.FindAsync(key) != null;
-                    case Collection.patients:
-                        return await ctx.Patients.FindAsync(key) != null;
-                    case Collection.carers:
-                        return await ctx.Carers.FindAsync(key) != null;
-                    case Collection.calendars:
-                        return await ctx.Calendars.FindAsync(key) != null;
-                    default:
-                        throw new Exception("Unknown table.");
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Unexpected error: " + e.Message);
-            }
-
-            return false;
-        }
+        public enum Collection { users, patients, carers, calendars, activitylogs };
 
 
         public static async Task<IEntity> GetEntityByPrimaryKey(DatabaseContext ctx, string key, Collection collection)
@@ -68,7 +41,7 @@ namespace iris_server.Services
         }
 
 
-        public static IEntity GetEntityByForiegnKey(DatabaseContext ctx, string key, Collection collection)
+        public static IEntity GetEntityByForeignKey(DatabaseContext ctx, string key, Collection collection)
         {
             try
             {
@@ -107,22 +80,22 @@ namespace iris_server.Services
             {
                 IEntity e = await GetEntityByPrimaryKey(ctx, key, collection);
 
-                switch (collection)
+                if (key != "testpatient" && key != "testcarer") // Avoid deleting test entries.
                 {
-                    case Collection.patients:
-                        if (key != "testpatient")
+                    switch (collection)
+                    {
+                        case Collection.patients:
                             ctx.Users.Remove((e as Patient).User);
-                        break;
-                    case Collection.carers:
-                        if (key != "testcarer")
+                            break;
+                        case Collection.carers:
                             ctx.Users.Remove((e as Carer).User);
-                        break;
-                    case Collection.calendars:
-                        if (key != "testpatient")
+                            break;
+                        case Collection.calendars:
                             ctx.Calendars.Remove(e as CalendarEntry);
-                        break;
-                    default:
-                        throw new Exception("Unknown table.");
+                            break;
+                        default:
+                            throw new Exception("Unknown table.");
+                    }
                 }
 
                 await ctx.SaveChangesAsync();
@@ -137,11 +110,7 @@ namespace iris_server.Services
         }
 
 
-        //public static async Task<ICollection<IEntity>> GetPaginatedCollection(DatabaseContext ctx, string pageIndex, string nItems)
-        //{
-
-        //}
-
+        // TODO: MOVE
         public static async Task<bool> UpdatePatientNotes(DatabaseContext ctx, string patientId, JObject notesJson)
         {
             try
@@ -187,7 +156,7 @@ namespace iris_server.Services
             }
         }
 
-        // TODO:
+        // TODO: IMPLEMENT
         public static async Task<bool> UpdatePatientConfig(DatabaseContext ctx, string patientId, JObject configJson)
         {
             try
@@ -235,6 +204,7 @@ namespace iris_server.Services
         }
 
 
+        // TODO: MOVE
         public static async Task<bool> MessagePatient(DatabaseContext ctx, string carerApiKey, string patientId, JObject messageJson)
         {
             try
@@ -242,7 +212,7 @@ namespace iris_server.Services
                 var jsonDict = JObject.FromObject(messageJson).ToObject<Dictionary<string, object>>();
                 string title = (string)jsonDict["Title"];
                 string message = (string)jsonDict["Message"];
-                Carer carer = (Carer)GetEntityByForiegnKey(ctx, carerApiKey, Collection.carers);
+                Carer carer = (Carer)GetEntityByForeignKey(ctx, carerApiKey, Collection.carers);
 
                 if (carer != null)
                 {
@@ -266,77 +236,18 @@ namespace iris_server.Services
         }
 
 
-        public static async Task<ICollection<ActivityLog>> GetLogs(DatabaseContext ctx, string patientId, string pageStr, string nItemsStr)
+        public static async Task<bool> CreatePatientActivityLog(DatabaseContext ctx, string patientApiKey, JObject logJson)
         {
             try
             {
-                int page = Math.Abs(int.Parse(pageStr));
-                int nItems = Math.Abs(int.Parse(nItemsStr));
-                int startIndex = (page - 1) * nItems;
-                var worker = await ctx.Patients.FindAsync(patientId);
-                ICollection<ActivityLog> logs = worker.ActivityLogs;
-                nItems = nItems - ((page * nItems) - logs.Count);
-                List<ActivityLog> logsList = logs.ToList();
-                // Return paginated collection.
-                return logsList.GetRange(startIndex, nItems);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
+                var jsonDict = JObject.FromObject(logJson).ToObject<Dictionary<string, object>>();
+                string caption = (string)jsonDict["Caption"];
+                string description = (string)jsonDict["JsonDescription"];
+                string location = (string)jsonDict["Location"];
+                ActivityLog log = new ActivityLog() { Caption = caption, JsonDescription = description, Location = location };
+                Patient patient = (Patient)GetEntityByForeignKey(ctx, patientApiKey, Collection.patients);
 
-            return null;
-        }
-
-
-        // TODO:
-        public static async Task<bool> LogActivity(DatabaseContext ctx, HttpContext httpContext, Patient patient)
-        {
-            //try
-            //{
-            //    var jsonDict = JObject.FromObject(logEntryJson).ToObject<Dictionary<string, object>>();
-            //    string caption = (string)jsonDict["Caption"];
-            //    string description = (string)jsonDict["JsonDescription"];
-            //    string location = (string)jsonDict["Location"];
-            //    ActivityLog log = new ActivityLog();
-            //    Patient patient = GetPatientById(ctx, id);
-
-            //    patient.ActivityLogs.Add(log);
-            //    await ctx.SaveChangesAsync();
-            //    return true;
-            //}
-            //catch (Exception e)
-            //{
-            //    Console.WriteLine(e);
-            //}
-            return false;
-        }
-
-        public static bool PatientIsAssigned(DatabaseContext ctx, string carerApiKey, string patientId)
-        {
-            try
-            {
-
-                Carer carer = (Carer)GetEntityByForiegnKey(ctx, carerApiKey, Collection.carers);
-                bool patientAssignedToThisCarer = carer.AssignedPatientIds.Contains(patientId);
-                return patientAssignedToThisCarer;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-            return false;
-        }
-
-
-        public static async Task<bool> CreateCarer(DatabaseContext ctx, string carerEmail)
-        {
-            try
-            {
-                User user = new User() { Role = User.UserRole.formalcarer.ToString() };
-                Carer carer = new Carer() { User = user, Email = carerEmail };
-                await ctx.Users.AddAsync(user);
-                await ctx.Carers.AddAsync(carer);
+                patient.ActivityLogs.Add(log);
                 await ctx.SaveChangesAsync();
                 return true;
             }
@@ -348,6 +259,54 @@ namespace iris_server.Services
         }
 
 
+        // TODO: MOVE
+        public static bool PatientIsAssigned(DatabaseContext ctx, string carerApiKey, string patientId)
+        {
+            try
+            {
+                Carer carer = (Carer)GetEntityByForeignKey(ctx, carerApiKey, Collection.carers);
+                bool patientAssignedToThisCarer = carer.AssignedPatientIds.Contains(patientId);
+                return patientAssignedToThisCarer;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return false;
+        }
+
+
+        // TODO: MOVE
+        public static async Task<bool> CreateUser(DatabaseContext ctx, string primaryKey, User.UserRole role)
+        {
+            try
+            {
+                User user = new User() { Role = role.ToString() };
+                await ctx.Users.AddAsync(user);
+
+                if (role == User.UserRole.patient)
+                {
+                    Patient patient = new Patient() { User = user, Id = primaryKey };
+                    await ctx.Patients.AddAsync(patient);
+                }
+                else
+                {
+                    Carer carer = new Carer() { User = user, Email = primaryKey };
+                    await ctx.Carers.AddAsync(carer);
+
+                }
+
+                await ctx.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return false;
+        }
+
+        // TODO: MOVE
         public static async Task<bool> AddCalendarEntry(DatabaseContext ctx, string patientId, string entryId, Dictionary<string, object> jsonDict)
         {
             try
@@ -371,24 +330,7 @@ namespace iris_server.Services
         }
 
 
-        public static async Task<CalendarEntry> GetCalendarEntryById(DatabaseContext ctx, string entryId)
-        {
-            try
-            {
-                CalendarEntry entry = ctx.Calendars.Find(entryId);
-                if (entry != null)
-                {
-                    return entry;
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-            return null;
-        }
-
-
+        // TODO: MOVE
         public static async Task<bool> UpdateCalendarEntry(DatabaseContext ctx, string calendarId, Dictionary<string, object> jsonDict)
         {
             try
@@ -444,6 +386,7 @@ namespace iris_server.Services
         }
 
 
+        // TODO: MOVE
         public static async Task<ICollection<CalendarEntry>> GetCalendarEntries(DatabaseContext ctx, string patientId, string pageStr, string nItemsStr)
         {
             try
@@ -467,11 +410,36 @@ namespace iris_server.Services
         }
 
 
+        // TODO: MOVE
+        public static async Task<ICollection<ActivityLog>> GetLogs(DatabaseContext ctx, string patientId, string pageStr, string nItemsStr)
+        {
+            try
+            {
+                int page = Math.Abs(int.Parse(pageStr));
+                int nItems = Math.Abs(int.Parse(nItemsStr));
+                int startIndex = (page - 1) * nItems;
+                var worker = await ctx.Patients.FindAsync(patientId);
+                ICollection<ActivityLog> logs = worker.ActivityLogs;
+                nItems = nItems - ((page * nItems) - logs.Count);
+                List<ActivityLog> logsList = logs.ToList();
+                // Return paginated collection.
+                return logsList.GetRange(startIndex, nItems);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
+            return null;
+        }
+
+
+        // TODO: MOVE
         public static ICollection<CalendarEntry> GetCalendarEntries(DatabaseContext ctx, string patientApiKey)
         {
             try
             {
-                Patient patient = (Patient)GetEntityByForiegnKey(ctx, patientApiKey, Collection.patients);
+                Patient patient = (Patient)GetEntityByForeignKey(ctx, patientApiKey, Collection.patients);
                 // Get only entries for today and tomorrow.
                 ICollection<CalendarEntry> entries = patient.CalendarEntries.Where(entry => entry.Start.Day >= DateTime.Now.Day && entry.Start.Day <= DateTime.Now.Day + 1).ToList();
                 return entries;

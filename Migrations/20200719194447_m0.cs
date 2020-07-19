@@ -46,9 +46,7 @@ namespace iris_server.Migrations
                     Id = table.Column<string>(nullable: false),
                     PatientId = table.Column<string>(nullable: true),
                     What = table.Column<string>(nullable: true),
-                    Ip = table.Column<string>(nullable: true),
                     When = table.Column<DateTime>(nullable: false),
-                    ResponseCode = table.Column<int>(nullable: false),
                     RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
                     UserApiKey = table.Column<string>(nullable: true)
                 },
@@ -207,7 +205,7 @@ namespace iris_server.Migrations
                     Id = table.Column<string>(nullable: false),
                     PatientId = table.Column<string>(nullable: true),
                     Content = table.Column<string>(nullable: true),
-                    Scale = table.Column<int>(nullable: false)
+                    Scale = table.Column<float>(nullable: false)
                 },
                 constraints: table =>
                 {

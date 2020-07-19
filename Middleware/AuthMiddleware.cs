@@ -1,7 +1,6 @@
 ﻿using iris_server.Models;
 using iris_server.Services;
 using Microsoft.AspNetCore.Http;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -16,17 +15,15 @@ namespace iris_server.Middleware
             _next = next;
         }
 
-        public async Task InvokeAsync(HttpContext context, DatabaseContext ctx)
+        public async Task InvokeAsync(HttpContext httpContext, DatabaseContext ctx)
         {
-            const string apiKeyHeader = "ApiKey";
-            string apiKey = string.Empty;
-            if (context.Request.Headers.TryGetValue(apiKeyHeader, out var headerValues))
+            const string expectedApiKeyHeader = "ApiKey";
+            string apiKey = httpContext.Request.Headers[expectedApiKeyHeader];
+            if (apiKey != null)
             {
-                apiKey = headerValues.FirstOrDefault(); // Extract from headerValues array.
-                bool keyExists = await DbService.LookupPrimaryKey(ctx, apiKey, DbService.Collection.users);
-                if (keyExists)
+                User user = (User)await DbService.GetEntityByPrimaryKey(ctx, apiKey, DbService.Collection.users);
+                if (user != null)
                 {
-                    User user = (User)await DbService.GetEntityByPrimaryKey(ctx, apiKey, DbService.Collection.users);
                     Claim[] claims =
                     {
                         new Claim(ClaimTypes.Name, user.ApiKey),
@@ -34,13 +31,10 @@ namespace iris_server.Middleware
                     };
 
                     ClaimsIdentity identity = new ClaimsIdentity(claims, "ApiKey");
-                    context.User.AddIdentity(identity);
+                    httpContext.User.AddIdentity(identity);
                 }
-
             }
-
-            await _next(context);
+            await _next(httpContext);
         }
-
     }
 }

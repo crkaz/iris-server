@@ -55,7 +55,7 @@ namespace iris_server.Controllers
         {
             try
             {
-                Patient patient = (Patient)DbService.GetEntityByForiegnKey(_ctx, apiKey, DbService.Collection.patients);
+                Patient patient = (Patient)DbService.GetEntityByForeignKey(_ctx, apiKey, DbService.Collection.patients);
                 // Get unread messages.
                 IEnumerable<PatientMessage> unreadMessages = patient.Messages.Where(message => message.Read == null);
                 return Ok(unreadMessages);

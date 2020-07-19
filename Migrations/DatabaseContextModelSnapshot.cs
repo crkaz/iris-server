@@ -95,11 +95,7 @@ namespace iris_server.Migrations
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Ip");
-
                     b.Property<string>("PatientId");
-
-                    b.Property<int>("ResponseCode");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -216,7 +212,7 @@ namespace iris_server.Migrations
 
                     b.Property<string>("PatientId");
 
-                    b.Property<int>("Scale");
+                    b.Property<float>("Scale");
 
                     b.HasKey("Id");
 

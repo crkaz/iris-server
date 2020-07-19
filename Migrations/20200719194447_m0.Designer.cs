@@ -10,7 +10,7 @@ using iris_server.Models;
 namespace iris_server.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20200719163445_m0")]
+    [Migration("20200719194447_m0")]
     partial class m0
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -97,11 +97,7 @@ namespace iris_server.Migrations
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Ip");
-
                     b.Property<string>("PatientId");
-
-                    b.Property<int>("ResponseCode");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -218,7 +214,7 @@ namespace iris_server.Migrations
 
                     b.Property<string>("PatientId");
 
-                    b.Property<int>("Scale");
+                    b.Property<float>("Scale");
 
                     b.HasKey("Id");
 

@@ -26,7 +26,8 @@ namespace iris_server.Models
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseLazyLoadingProxies(); // Enable lazy loading.
-            optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=iris-db;");
+            optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=TEST-iris-db;");
+            //optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=iris-db;");
             base.OnConfiguring(optionsBuilder);
         }
 

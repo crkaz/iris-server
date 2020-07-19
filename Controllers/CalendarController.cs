@@ -120,7 +120,7 @@ namespace iris_server.Controllers
         {
             try
             {
-                bool entryExists = DbService.GetCalendarEntryById(_ctx, entryId).GetAwaiter().GetResult() != null;
+                bool entryExists = DbService.GetEntityByPrimaryKey(_ctx, entryId, DbService.Collection.calendars).GetAwaiter().GetResult() != null;
                 if (entryExists)
                 {
                     bool success = DbService.DeleteEntityByPrimaryKey(_ctx, entryId, DbService.Collection.calendars).GetAwaiter().GetResult();
@@ -148,15 +148,15 @@ namespace iris_server.Controllers
         // Get all future calender entries for a patient between todays date.
         // ..api/patient/calendar?id=..&date=
         [HttpGet]
-        [Authorize(Roles = "admin,formalcarer,informalcarer,patient")]
-        public IActionResult CarerGet([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromQuery(Name = "page")] string page, [FromQuery(Name = "nitems")] string nItems)
+        [Authorize(Roles = "admin,formalcarer,informalcarer")]
+        public IActionResult CarerGet([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string patientId, [FromQuery(Name = "page")] string page, [FromQuery(Name = "nitems")] string nItems)
         {
             try
             {
-                bool patientAssignedToCarer = DbService.PatientIsAssigned(_ctx, apiKey, id);
+                bool patientAssignedToCarer = DbService.PatientIsAssigned(_ctx, apiKey, patientId);
                 if (patientAssignedToCarer)
                 {
-                    ICollection<CalendarEntry> entries = DbService.GetCalendarEntries(_ctx, id, page, nItems).GetAwaiter().GetResult();
+                    ICollection<CalendarEntry> entries = DbService.GetCalendarEntries(_ctx, patientId, page, nItems).GetAwaiter().GetResult();
                     string entriesJson = JsonConvert.SerializeObject(entries);
                     return Ok(entriesJson);
                 }

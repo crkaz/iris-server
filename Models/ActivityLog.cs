@@ -1,10 +1,11 @@
-﻿using System;
+﻿using iris_server.Models.Interfaces;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace iris_server.Models
 {
-    public class ActivityLog
+    public class ActivityLog : IEntity
     {
         // DB fields.
         [Key] // Make primary key via EF convention.

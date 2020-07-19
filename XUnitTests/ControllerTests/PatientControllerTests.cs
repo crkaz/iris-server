@@ -6,6 +6,7 @@ using iris_server.Models;
 using XUnitTests.Utils;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace XUnitTests
 {
@@ -34,8 +35,6 @@ namespace XUnitTests
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedPatientId, actualPatientId);
-
-            
         }
 
 
@@ -66,8 +65,6 @@ namespace XUnitTests
             Assert.True(patients.Length == 2);
             Assert.Equal(expectedPatientId1, actualPatientId1);
             Assert.Equal(expectedPatientId2, actualPatientId2);
-
-            
         }
 
 
@@ -89,8 +86,6 @@ namespace XUnitTests
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-
-            
         }
 
 
@@ -115,8 +110,6 @@ namespace XUnitTests
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedResponseBody, actualResponseBody);
-
-            
         }
 
 
@@ -138,8 +131,6 @@ namespace XUnitTests
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-
-            
         }
 
 
@@ -161,8 +152,6 @@ namespace XUnitTests
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-
-            
         }
 
 
@@ -187,8 +176,6 @@ namespace XUnitTests
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedResponseBody, actualResponseBody);
-
-            
         }
 
 
@@ -213,8 +200,6 @@ namespace XUnitTests
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedPatientStatus, actualPatientStatus);
-
-            
         }
 
 
@@ -239,8 +224,6 @@ namespace XUnitTests
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedResponseBody, actualResponseBody);
-
-            
         }
 
 
@@ -265,8 +248,6 @@ namespace XUnitTests
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedPatientStatus, actualPatientStatus);
-
-            
         }
 
 
@@ -291,8 +272,6 @@ namespace XUnitTests
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedResponseBody, actualResponseBody);
-
-            
         }
 
         /// <summary>
@@ -316,8 +295,6 @@ namespace XUnitTests
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedResponseBody, actualResponseBody);
-
-            
         }
 
 
@@ -346,10 +323,9 @@ namespace XUnitTests
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedNLogs, actualNLogs);
-            Assert.Equal(expectedLogIds, actualLogIds);
-
-            
+            Assert.True(actualNLogs >= expectedNLogs);
+            Assert.Contains(expectedLogIds[0], actualLogIds);
+            Assert.Contains(expectedLogIds[1], actualLogIds);
         }
 
 
@@ -378,10 +354,9 @@ namespace XUnitTests
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedNLogs, actualNLogs);
-            Assert.Equal(expectedLogIds, actualLogIds);
-
-            
+            Assert.True(actualNLogs >= expectedNLogs);
+            Assert.Contains(expectedLogIds[0], actualLogIds);
+            Assert.Contains(expectedLogIds[1], actualLogIds);
         }
 
 
@@ -405,8 +380,6 @@ namespace XUnitTests
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedNLogs, actualNLogs);
-
-            
         }
 
 
@@ -426,8 +399,50 @@ namespace XUnitTests
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
+        }
 
-            
+
+        [Fact]
+        public async Task PostActivityLogsOkRequest()
+        {
+            // arrange
+            TestClient testClient = new TestClient();
+            const string endpoint = "patient/logs/";
+            string requestBody = JsonConvert.SerializeObject(new ActivityLog() { Caption = "test", Location = "test", JsonDescription = "test" });
+            const string expectedResponse = "Logged successfully.";
+            const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
+            testClient.AddHeader("ApiKey", "testpatient");
+
+            // act
+            HttpResponseMessage response = await testClient.PostRequest(endpoint, body: requestBody);
+            string actualResponse = await response.Content.ReadAsStringAsync();
+            HttpStatusCode actualStatusCode = response.StatusCode;
+
+            // assert
+            Assert.Equal(expectedStatusCode, actualStatusCode);
+            Assert.Equal(expectedResponse, actualResponse);
+        }
+
+
+        [Fact]
+        public async Task PostActivityLogsBadRequest()
+        {
+            // arrange
+            TestClient testClient = new TestClient();
+            const string endpoint = "patient/logs/";
+            string requestBody = JsonConvert.SerializeObject(new Carer()); // Incorrect object.
+            const string expectedResponse = "Logging failed.";
+            const HttpStatusCode expectedStatusCode = HttpStatusCode.BadRequest;
+            testClient.AddHeader("ApiKey", "testpatient");
+
+            // act
+            HttpResponseMessage response = await testClient.PostRequest(endpoint, body: requestBody);
+            string actualResponse = await response.Content.ReadAsStringAsync();
+            HttpStatusCode actualStatusCode = response.StatusCode;
+
+            // assert
+            Assert.Equal(expectedStatusCode, actualStatusCode);
+            Assert.Equal(expectedResponse, actualResponse);
         }
     }
 }

@@ -99,67 +99,68 @@ namespace XUnitTests
         }
 
 
-        [Fact]
-        public async Task ResetCarerEmailOkRequest()
-        {
-            // arrange
-            TestClient testClient = new TestClient();
-            const string endpoint = "carer/reset/?id=testcarer";
-            const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
-            const string expectedResponse = "Password reset sent successfully.";
-            testClient.AddHeader("ApiKey", "testcarer");
+        // USE FIRBASE IN FRONTEND INSTEAD
+        //[Fact]
+        //public async Task ResetCarerEmailOkRequest()
+        //{
+        //    // arrange
+        //    TestClient testClient = new TestClient();
+        //    const string endpoint = "carer/reset/?id=testcarer";
+        //    const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
+        //    const string expectedResponse = "Password reset sent successfully.";
+        //    testClient.AddHeader("ApiKey", "testcarer");
 
-            // act
-            HttpResponseMessage response = await testClient.GetRequest(endpoint);
-            string actualResponse = await response.Content.ReadAsStringAsync();
-            HttpStatusCode actualStatusCode = response.StatusCode;
+        //    // act
+        //    HttpResponseMessage response = await testClient.GetRequest(endpoint);
+        //    string actualResponse = await response.Content.ReadAsStringAsync();
+        //    HttpStatusCode actualStatusCode = response.StatusCode;
 
-            // assert
-            Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedResponse, actualResponse);
-        }
-
-
-        [Fact]
-        public async Task ResetCarerEmailNotFound()
-        {
-            // arrange
-            TestClient testClient = new TestClient();
-            const string endpoint = "carer/reset/?id=testpatient";
-            const HttpStatusCode expectedStatusCode = HttpStatusCode.NotFound;
-            const string expectedResponse = "Could not find a carer with that email.";
-            testClient.AddHeader("ApiKey", "testcarer");
-
-            // act
-            HttpResponseMessage response = await testClient.GetRequest(endpoint);
-            string actualResponse = await response.Content.ReadAsStringAsync();
-            HttpStatusCode actualStatusCode = response.StatusCode;
-
-            // assert
-            Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedResponse, actualResponse);
-        }
+        //    // assert
+        //    Assert.Equal(expectedStatusCode, actualStatusCode);
+        //    Assert.Equal(expectedResponse, actualResponse);
+        //}
 
 
-        [Fact]
-        public async Task DeleteCarerOkRequest()
-        {
-            // arrange
-            TestClient testClient = new TestClient();
-            const string endpoint = "carer/delete/?id=testcarer";
-            const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
-            const string expectedResponse = "Carer deleted successfully.";
-            testClient.AddHeader("ApiKey", "testcarer_nopatients");
+        //[Fact]
+        //public async Task ResetCarerEmailNotFound()
+        //{
+        //    // arrange
+        //    TestClient testClient = new TestClient();
+        //    const string endpoint = "carer/reset/?id=testpatient";
+        //    const HttpStatusCode expectedStatusCode = HttpStatusCode.NotFound;
+        //    const string expectedResponse = "Could not find a carer with that email.";
+        //    testClient.AddHeader("ApiKey", "testcarer");
 
-            // act
-            HttpResponseMessage response = await testClient.GetRequest(endpoint);
-            string actualResponse = await response.Content.ReadAsStringAsync();
-            HttpStatusCode actualStatusCode = response.StatusCode;
+        //    // act
+        //    HttpResponseMessage response = await testClient.GetRequest(endpoint);
+        //    string actualResponse = await response.Content.ReadAsStringAsync();
+        //    HttpStatusCode actualStatusCode = response.StatusCode;
 
-            // assert
-            Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedResponse, actualResponse);
-        }
+        //    // assert
+        //    Assert.Equal(expectedStatusCode, actualStatusCode);
+        //    Assert.Equal(expectedResponse, actualResponse);
+        //}
+
+
+        //[Fact]
+        //public async Task DeleteCarerOkRequest()
+        //{
+        //    // arrange
+        //    TestClient testClient = new TestClient();
+        //    const string endpoint = "carer/delete/?id=testcarer";
+        //    const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
+        //    const string expectedResponse = "Carer deleted successfully.";
+        //    testClient.AddHeader("ApiKey", "testcarer_nopatients");
+
+        //    // act
+        //    HttpResponseMessage response = await testClient.GetRequest(endpoint);
+        //    string actualResponse = await response.Content.ReadAsStringAsync();
+        //    HttpStatusCode actualStatusCode = response.StatusCode;
+
+        //    // assert
+        //    Assert.Equal(expectedStatusCode, actualStatusCode);
+        //    Assert.Equal(expectedResponse, actualResponse);
+        //}
 
 
         [Fact]
