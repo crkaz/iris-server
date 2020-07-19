@@ -1,19 +1,17 @@
-﻿using System;
+﻿using iris_server.Models.Interfaces;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json.Linq;
 
 namespace iris_server.Models
 {
-    public class Patient
+    public class Patient : IEntity
     {
         public enum PatientStatus { offline, online, alert };
 
         // DB fields.
         [Key]
         public string Id { get; set; } // Primary Key.
+        [Required]
         public virtual User User { get; set; } // Foreign Key.
         public string Status { get; set; }
         public virtual PatientNotes Notes { get; set; }

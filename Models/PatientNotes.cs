@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace iris_server.Models
 {
@@ -13,6 +10,8 @@ namespace iris_server.Models
 
         [Key]
         public string Id { get; set; } // Primary key.
+        [ForeignKey("PatientId")]
+        public string PatientId { get; set; }
         public AgeRange Age { get; set; }
         public Severity Diagnosis { get; set; }
         public string Notes { get; set; }

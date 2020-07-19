@@ -15,6 +15,8 @@ namespace iris_server.Models
         public DbSet<User> Users { get; set; }
         public DbSet<Patient> Patients { get; set; }
         public DbSet<Carer> Carers { get; set; }
+        public DbSet<PatientNotes> PatientNotes { get; set; }
+        public DbSet<PatientConfig> Configs { get; set; }
         public DbSet<CalendarEntry> Calendars { get; set; }
         public DbSet<PatientMessage> Messages { get; set; }
         public DbSet<StickyNote> Stickies { get; set; }

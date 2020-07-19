@@ -21,10 +21,10 @@ namespace XUnitTests
         //    ActivityLog newLog = new ActivityLog();
         //    string requestBody = JsonConvert.SerializeObject(newLog);
         //    const string expectedResponseBody = "Activity log added successfully.";
-        //    TestClient.Instance.AddHeader("ApiKey", "testpatient");
+        //    testClient.AddHeader("ApiKey", "testpatient");
 
         //    // act
-        //    HttpResponseMessage response = await TestClient.Instance.PostRequest(endpoint, body: requestBody);
+        //    HttpResponseMessage response = await testClient.PostRequest(endpoint, body: requestBody);
         //    string actualResponseBody = await response.Content.ReadAsStringAsync();
         //    HttpStatusCode actualStatusCode = response.StatusCode;
 

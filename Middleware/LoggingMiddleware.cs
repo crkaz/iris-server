@@ -16,7 +16,7 @@ namespace iris_server.Middleware
             _next = next;
         }
 
-        public async Task InvokeAsync(HttpContext context, DatabaseContext dbContext)
+        public async Task InvokeAsync(HttpContext context, DatabaseContext ctx)
         {
             string apiKey = context.Request.Headers["ApiKey"];
             string requestedEndpoint = context.Request.Path;
@@ -25,18 +25,18 @@ namespace iris_server.Middleware
             DbLog log = new DbLog(requestedEndpoint, context.Response.StatusCode, ip);
 
             // Log the request.
-            User user = dbContext.Users.Find(apiKey);
+            User user = ctx.Users.Find(apiKey);
             if (user != null)
             {
                 // Log request against a registered user.
-                dbContext.Users.Find(apiKey).DbLogs.Add(log);
+                ctx.Users.Find(apiKey).DbLogs.Add(log);
 
                 // Create a separate "activty log" for patients.
-                Patient patient = DbService.GetPatientByApiKey(dbContext, apiKey);
+                Patient patient = (Patient)DbService.GetEntityByForiegnKey(ctx, apiKey, DbService.Collection.patients);
                 bool isAPatientRequest = patient != null;
                 if (isAPatientRequest)
                 {
-                    DbService.LogActivity(dbContext, context, patient);
+                    await DbService.LogActivity(ctx, context, patient);
                 }
             }
             else
@@ -44,9 +44,9 @@ namespace iris_server.Middleware
                 // Log request from Unrecognised user.
                 string guid = Guid.NewGuid().ToString();
                 log.Id = "unknown-" + guid;
-                dbContext.DbLogs.Add(log);
+                ctx.DbLogs.Add(log);
             }
-            dbContext.SaveChanges();
+            ctx.SaveChanges();
 
             await _next(context);
         }

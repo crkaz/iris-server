@@ -51,24 +51,14 @@ namespace iris_server.Controllers
         // Get a patients unread messages.
         // ..api/message/get?id=
         [Authorize(Roles = "patient")]
-        public IActionResult Get([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
+        public IActionResult Get([FromHeader(Name = "ApiKey")] string apiKey)
         {
             try
             {
-                bool authorised = DbService.MatchPatientApiKeyWithId(_ctx, apiKey, id).GetAwaiter().GetResult();
-
-                if (authorised)
-                {
-                    Patient patient = DbService.GetPatientByApiKey(_ctx, apiKey);
-
-                    // Get unread messages.
-                    IEnumerable<PatientMessage> unreadMessages = patient.Messages.Where(message => message.Read == null);
-                    return Ok(unreadMessages);
-                }
-                else
-                {
-                    return Unauthorized("Credentials do not match.");
-                }
+                Patient patient = (Patient)DbService.GetEntityByForiegnKey(_ctx, apiKey, DbService.Collection.patients);
+                // Get unread messages.
+                IEnumerable<PatientMessage> unreadMessages = patient.Messages.Where(message => message.Read == null);
+                return Ok(unreadMessages);
             }
             catch (Exception e)
             {

@@ -1,12 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using iris_server.Models.Interfaces;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 
 namespace iris_server.Models
 {
-    public class User
+    public class User : IEntity
     {
         public enum UserRole { admin, formalcarer, informalcarer, patient };
 

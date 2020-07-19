@@ -80,7 +80,8 @@ namespace iris_server.Migrations
 
                     b.Property<string>("AssignedPatientIds");
 
-                    b.Property<string>("UserApiKey");
+                    b.Property<string>("UserApiKey")
+                        .IsRequired();
 
                     b.HasKey("Email");
 
@@ -95,6 +96,8 @@ namespace iris_server.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("Ip");
+
+                    b.Property<string>("PatientId");
 
                     b.Property<int>("ResponseCode");
 
@@ -120,19 +123,12 @@ namespace iris_server.Migrations
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("ConfigId");
-
-                    b.Property<string>("NotesId");
-
                     b.Property<string>("Status");
 
-                    b.Property<string>("UserApiKey");
+                    b.Property<string>("UserApiKey")
+                        .IsRequired();
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ConfigId");
-
-                    b.HasIndex("NotesId");
 
                     b.HasIndex("UserApiKey");
 
@@ -146,13 +142,19 @@ namespace iris_server.Migrations
 
                     b.Property<string>("EnabledFeatures");
 
+                    b.Property<string>("PatientId");
+
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate();
 
                     b.HasKey("Id");
 
-                    b.ToTable("PatientConfig");
+                    b.HasIndex("PatientId")
+                        .IsUnique()
+                        .HasFilter("[PatientId] IS NOT NULL");
+
+                    b.ToTable("Configs");
                 });
 
             modelBuilder.Entity("iris_server.Models.PatientMessage", b =>
@@ -160,7 +162,7 @@ namespace iris_server.Migrations
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("CarerEmail");
+                    b.Property<string>("CarerId");
 
                     b.Property<string>("Message");
 
@@ -173,8 +175,6 @@ namespace iris_server.Migrations
                     b.Property<string>("Title");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CarerEmail");
 
                     b.HasIndex("PatientId");
 
@@ -192,11 +192,17 @@ namespace iris_server.Migrations
 
                     b.Property<string>("Notes");
 
+                    b.Property<string>("PatientId");
+
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate();
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PatientId")
+                        .IsUnique()
+                        .HasFilter("[PatientId] IS NOT NULL");
 
                     b.ToTable("PatientNotes");
                 });
@@ -244,8 +250,8 @@ namespace iris_server.Migrations
 
             modelBuilder.Entity("iris_server.Models.CalendarEntry", b =>
                 {
-                    b.HasOne("iris_server.Models.Carer", "Carer")
-                        .WithMany()
+                    b.HasOne("iris_server.Models.Carer")
+                        .WithMany("CalendarEntries")
                         .HasForeignKey("CarerEmail");
 
                     b.HasOne("iris_server.Models.Patient")
@@ -257,7 +263,8 @@ namespace iris_server.Migrations
                 {
                     b.HasOne("iris_server.Models.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserApiKey");
+                        .HasForeignKey("UserApiKey")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("iris_server.Models.DbLog", b =>
@@ -269,28 +276,31 @@ namespace iris_server.Migrations
 
             modelBuilder.Entity("iris_server.Models.Patient", b =>
                 {
-                    b.HasOne("iris_server.Models.PatientConfig", "Config")
-                        .WithMany()
-                        .HasForeignKey("ConfigId");
-
-                    b.HasOne("iris_server.Models.PatientNotes", "Notes")
-                        .WithMany()
-                        .HasForeignKey("NotesId");
-
                     b.HasOne("iris_server.Models.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserApiKey");
+                        .HasForeignKey("UserApiKey")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("iris_server.Models.PatientConfig", b =>
+                {
+                    b.HasOne("iris_server.Models.Patient")
+                        .WithOne("Config")
+                        .HasForeignKey("iris_server.Models.PatientConfig", "PatientId");
                 });
 
             modelBuilder.Entity("iris_server.Models.PatientMessage", b =>
                 {
-                    b.HasOne("iris_server.Models.Carer", "Carer")
-                        .WithMany()
-                        .HasForeignKey("CarerEmail");
-
                     b.HasOne("iris_server.Models.Patient")
                         .WithMany("Messages")
                         .HasForeignKey("PatientId");
+                });
+
+            modelBuilder.Entity("iris_server.Models.PatientNotes", b =>
+                {
+                    b.HasOne("iris_server.Models.Patient")
+                        .WithOne("Notes")
+                        .HasForeignKey("iris_server.Models.PatientNotes", "PatientId");
                 });
 
             modelBuilder.Entity("iris_server.Models.StickyNote", b =>

@@ -15,41 +15,20 @@ namespace XUnitTests
         public async Task GetFallDetectionOkRequest()
         {
             // arrange
-            
+            TestClient testClient = new TestClient();
             const string endpoint = "compute/detectfall/?id=testpatient";
             const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
-            TestClient.Instance.AddHeader("ApiKey", "testpatient");
+            testClient.AddHeader("ApiKey", "testpatient");
 
             // act
-            HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
+            HttpResponseMessage response = await testClient.GetRequest(endpoint);
             string responseContentJson = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
 
-            
-        }
 
-
-        [Fact]
-        public async Task GetFallDetectionUnauthorised()
-        {
-            // arrange
-            
-            const string endpoint = "compute/detectfall/?id=testpatient";
-            const HttpStatusCode expectedStatusCode = HttpStatusCode.Unauthorized;
-            TestClient.Instance.AddHeader("ApiKey", "testcarer");
-
-            // act
-            HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
-            HttpStatusCode actualStatusCode = response.StatusCode;
-
-            // assert
-            Assert.Equal(expectedStatusCode, actualStatusCode);
-
-            
         }
 
 
@@ -57,20 +36,20 @@ namespace XUnitTests
         public async Task GetFallDetectionBadRequest()
         {
             // arrange
-            
+            TestClient testClient = new TestClient();
             const string endpoint = "compute/detectfall/?id=testpatient";
             const HttpStatusCode expectedStatusCode = HttpStatusCode.BadRequest;
-            TestClient.Instance.AddHeader("ApiKey", "testcarer");
+            testClient.AddHeader("ApiKey", "testcarer");
 
             // act
-            HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
+            HttpResponseMessage response = await testClient.GetRequest(endpoint);
             string responseContentJson = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
 
-            
+
         }
 
 
@@ -78,41 +57,20 @@ namespace XUnitTests
         public async Task GetRoomDetectionOkRequest()
         {
             // arrange
-            
+            TestClient testClient = new TestClient();
             const string endpoint = "compute/detectroom/?id=testpatient";
             const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
-            TestClient.Instance.AddHeader("ApiKey", "testpatient");
+            testClient.AddHeader("ApiKey", "testpatient");
 
             // act
-            HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
+            HttpResponseMessage response = await testClient.GetRequest(endpoint);
             string responseContentJson = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
 
-            
-        }
 
-
-        [Fact]
-        public async Task GetRoomDetectionUnauthorised()
-        {
-            // arrange
-            
-            const string endpoint = "compute/detectroom/?id=testpatient";
-            const HttpStatusCode expectedStatusCode = HttpStatusCode.Unauthorized;
-            TestClient.Instance.AddHeader("ApiKey", "testcarer");
-
-            // act
-            HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
-            HttpStatusCode actualStatusCode = response.StatusCode;
-
-            // assert
-            Assert.Equal(expectedStatusCode, actualStatusCode);
-
-            
         }
 
 
@@ -120,20 +78,20 @@ namespace XUnitTests
         public async Task GetRoomDetectionBadRequest()
         {
             // arrange
-            
+            TestClient testClient = new TestClient();
             const string endpoint = "compute/detectroom/?id=testpatient";
             const HttpStatusCode expectedStatusCode = HttpStatusCode.BadRequest;
-            TestClient.Instance.AddHeader("ApiKey", "testcarer");
+            testClient.AddHeader("ApiKey", "testcarer");
 
             // act
-            HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
+            HttpResponseMessage response = await testClient.GetRequest(endpoint);
             string responseContentJson = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
 
-            
+
         }
 
 
@@ -141,41 +99,20 @@ namespace XUnitTests
         public async Task GetConfusionDetectionOkRequest()
         {
             // arrange
-            
+            TestClient testClient = new TestClient();
             const string endpoint = "compute/detectconfusion/?id=testpatient";
             const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
-            TestClient.Instance.AddHeader("ApiKey", "testpatient");
+            testClient.AddHeader("ApiKey", "testpatient");
 
             // act
-            HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
+            HttpResponseMessage response = await testClient.GetRequest(endpoint);
             string responseContentJson = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
 
-            
-        }
 
-
-        [Fact]
-        public async Task GetConfusionDetectionUnauthorised()
-        {
-            // arrange
-            
-            const string endpoint = "compute/detectconfusion/?id=testpatient";
-            const HttpStatusCode expectedStatusCode = HttpStatusCode.Unauthorized;
-            TestClient.Instance.AddHeader("ApiKey", "testcarer");
-
-            // act
-            HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
-            HttpStatusCode actualStatusCode = response.StatusCode;
-
-            // assert
-            Assert.Equal(expectedStatusCode, actualStatusCode);
-
-            
         }
 
 
@@ -183,20 +120,20 @@ namespace XUnitTests
         public async Task GetConfusionDetectionBadRequest()
         {
             // arrange
-            
+            TestClient testClient = new TestClient();
             const string endpoint = "compute/detectconfusion/?id=testpatient";
             const HttpStatusCode expectedStatusCode = HttpStatusCode.BadRequest;
-            TestClient.Instance.AddHeader("ApiKey", "testcarer");
+            testClient.AddHeader("ApiKey", "testcarer");
 
             // act
-            HttpResponseMessage response = await TestClient.Instance.GetRequest(endpoint);
+            HttpResponseMessage response = await testClient.GetRequest(endpoint);
             string responseContentJson = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
 
-            
+
         }
     }
 }

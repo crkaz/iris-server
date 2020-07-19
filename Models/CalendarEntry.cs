@@ -1,17 +1,22 @@
-﻿using System;
+﻿using iris_server.Models.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace iris_server.Models
 {
-    public class CalendarEntry
+    public class CalendarEntry : IEntity
     {
         public enum Repetition { Never, Daily, Weekly, Monthly, Yearly };
 
         // DB fields.
         [Key] // Make primary key via EF convention.
         public string Id { get; set; } // Primary key.
-        public virtual Carer Carer { get; set; } // Foreign key.
+        [ForeignKey("PatientId")]
+        public string PatientId { get; set; }
+        [ForeignKey("CarerEmail")]
+        public string CarerEmail { get; set; }
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
         public Repetition Repeat { get; set; }

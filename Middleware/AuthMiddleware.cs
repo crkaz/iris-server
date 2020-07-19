@@ -16,19 +16,17 @@ namespace iris_server.Middleware
             _next = next;
         }
 
-        public async Task InvokeAsync(HttpContext context, DatabaseContext dbContext)
+        public async Task InvokeAsync(HttpContext context, DatabaseContext ctx)
         {
             const string apiKeyHeader = "ApiKey";
             string apiKey = string.Empty;
             if (context.Request.Headers.TryGetValue(apiKeyHeader, out var headerValues))
             {
                 apiKey = headerValues.FirstOrDefault(); // Extract from headerValues array.
-                bool keyExists = await DbService.LookupApiKey(dbContext, apiKey);
-
+                bool keyExists = await DbService.LookupPrimaryKey(ctx, apiKey, DbService.Collection.users);
                 if (keyExists)
                 {
-                    User user = await DbService.GetUserByApiKey(dbContext, apiKey);
-
+                    User user = (User)await DbService.GetEntityByPrimaryKey(ctx, apiKey, DbService.Collection.users);
                     Claim[] claims =
                     {
                         new Claim(ClaimTypes.Name, user.ApiKey),

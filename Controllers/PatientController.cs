@@ -20,14 +20,14 @@ namespace iris_server.Controllers
         /// ..api/patient/delete?id=
         [HttpDelete]
         [Authorize(Roles = "admin")]
-        public IActionResult Delete([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
+        public IActionResult Delete([FromHeader(Name = "ApiKey")] string carerApiKey, [FromQuery(Name = "id")] string patientId)
         {
             try
             {
-                bool patientAssignedToThisCarer = DbService.PatientIsAssigned(_ctx, apiKey, id);
+                bool patientAssignedToThisCarer = DbService.PatientIsAssigned(_ctx, carerApiKey, patientId);
                 if (patientAssignedToThisCarer)
                 {
-                    bool success = DbService.DeletePatientById(_ctx, id).GetAwaiter().GetResult();
+                    bool success = DbService.DeleteEntityByPrimaryKey(_ctx, patientId, DbService.Collection.patients).GetAwaiter().GetResult();
                     if (success)
                     {
                         return Ok();
@@ -61,8 +61,7 @@ namespace iris_server.Controllers
                     bool patientAssignedToThisCarer = DbService.PatientIsAssigned(_ctx, apiKey, id);
                     if (patientAssignedToThisCarer)
                     {
-                        Patient patient = DbService.GetPatientById(_ctx, id).GetAwaiter().GetResult();
-
+                        Patient patient = (Patient)DbService.GetEntityByPrimaryKey(_ctx, id, DbService.Collection.patients).GetAwaiter().GetResult();
                         if (patient != null)
                         {
                             patients.Add(patient);
@@ -99,7 +98,7 @@ namespace iris_server.Controllers
                 bool patientAssignedToThisCarer = DbService.PatientIsAssigned(_ctx, apiKey, id);
                 if (patientAssignedToThisCarer)
                 {
-                    Patient patient = DbService.GetPatientById(_ctx, id).GetAwaiter().GetResult();
+                    Patient patient = (Patient)DbService.GetEntityByPrimaryKey(_ctx, id, DbService.Collection.patients).GetAwaiter().GetResult();
                     bool patientExists = patient != null;
 
                     if (patientExists)
@@ -131,12 +130,11 @@ namespace iris_server.Controllers
         {
             try
             {
-                bool authorised = DbService.GetPatientByApiKey(_ctx, apiKey).Id == id;
-                if (authorised)
+                Patient patient = (Patient)DbService.GetEntityByForiegnKey(_ctx, apiKey, DbService.Collection.patients);
+                if (patient.Id == id)
                 {
                     string[] enumNames = Enum.GetNames(typeof(Patient.PatientStatus));
                     bool validStatus = enumNames.Contains(status);
-                    Patient patient = DbService.GetPatientByApiKey(_ctx, apiKey);
                     if (validStatus)
                     {
                         patient.Status = status;

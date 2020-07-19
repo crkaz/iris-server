@@ -16,22 +16,11 @@ namespace iris_server.Controllers
         // ..api/compute/detectroom
         [HttpGet]
         // [Authorize(Roles = "Patient")]
-        public IActionResult DetectRoom([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")]string id)
+        public IActionResult DetectRoom([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
         {
             try
             {
-                bool authorised = DbService.MatchPatientApiKeyWithId(_ctx, apiKey, id).GetAwaiter().GetResult();
-                if (authorised)
-                {
-                    //byte[] imageBytes = await Request.GetRawBodyBytesAsync();
-                    //// Get azure labels
-                    //// Pass to detection service
-                    return Ok();
-                }
-                else
-                {
-                    return Unauthorized();
-                }
+                return Ok();
             }
             catch (Exception e)
             {
@@ -44,22 +33,14 @@ namespace iris_server.Controllers
         // ..api/compute/detectconfusion
         [HttpGet]
         // [Authorize(Roles = "Patient")]
-        public IActionResult DetectConfusion([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")]string id)
+        public IActionResult DetectConfusion([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
         {
             try
             {
-                bool authorised =  DbService.MatchPatientApiKeyWithId(_ctx, apiKey, id).GetAwaiter().GetResult();
-                if (authorised)
-                {
-                    //byte[] imageBytes = await Request.GetRawBodyBytesAsync();
-                    //// Get azure labels
-                    //// Pass to detection service
-                    return Ok();
-                }
-                else
-                {
-                    return Unauthorized();
-                }
+                //byte[] imageBytes = await Request.GetRawBodyBytesAsync();
+                //// Get azure labels
+                //// Pass to detection service
+                return Ok();
             }
             catch (Exception e)
             {
@@ -72,24 +53,16 @@ namespace iris_server.Controllers
         // ..api/compute/detectfall
         [HttpGet]
         // [Authorize(Roles = "Patient")]
-        public IActionResult DetectFall([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")]string id, [FromBody] JObject transforms)
+        public IActionResult DetectFall([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromBody] JObject transforms)
         {
             //return DetectionService.DetectFall(transforms);
 
             try
             {
-                bool authorised =  DbService.MatchPatientApiKeyWithId(_ctx, apiKey, id).GetAwaiter().GetResult();
-                if (authorised)
-                {
-                    //byte[] imageBytes = await Request.GetRawBodyBytesAsync();
-                    //// Get azure labels
-                    //// Pass to detection service
-                    return Ok();
-                }
-                else
-                {
-                    return Unauthorized();
-                }
+                //byte[] imageBytes = await Request.GetRawBodyBytesAsync();
+                //// Get azure labels
+                //// Pass to detection service
+                return Ok();
             }
             catch (Exception e)
             {

@@ -15,25 +15,10 @@ namespace XUnitTests.Utils
         private const string HOST = "http://localhost:54268/api/";
         private readonly HttpClient Client = new HttpClient();
 
-        #region Singleton pattern.
-        private static TestClient instance;
-        public static TestClient Instance
+        public TestClient(string host = HOST)
         {
-            get
-            {
-                if (instance == null)
-                {
-                    instance = new TestClient();
-                }
-                return instance;
-            }
+            Init(host);
         }
-
-        private TestClient()
-        {
-            Init(HOST);
-        }
-        #endregion
 
 
         private void Init(string host)
@@ -54,13 +39,6 @@ namespace XUnitTests.Utils
                 // Host unavailable.
                 throw new Exception("Connection refused. Please check that the host is online before running the tests.");
             }
-        }
-
-
-        public void Destroy()
-        {
-            GC.Collect();
-            Client.Dispose();
         }
 
 

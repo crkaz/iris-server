@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using iris_server.Models;
 using iris_server.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -17,14 +16,14 @@ namespace iris_server.Controllers
         // Edit a patient's 'notes'.
         // ..api/patientinfo/put?id=
         [Authorize(Roles = "admin,formalcarer,informalcarer")]
-        public IActionResult Put([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromBody] JObject notesJson)
+        public IActionResult Put([FromHeader(Name = "ApiKey")] string carerApiKey, [FromQuery(Name = "id")] string patientId, [FromBody] JObject notesJson)
         {
             try
             {
-                bool patientAssignedToThisCarer = DbService.PatientIsAssigned(_ctx, apiKey, id);
+                bool patientAssignedToThisCarer = DbService.PatientIsAssigned(_ctx, carerApiKey, patientId);
                 if (patientAssignedToThisCarer)
                 {
-                    bool success = DbService.UpdatePatientNotes(_ctx, id, notesJson).GetAwaiter().GetResult();
+                    bool success = DbService.UpdatePatientNotes(_ctx, patientId, notesJson).GetAwaiter().GetResult();
                     if (success)
                     {
                         return Ok("Updated patient successfully.");
@@ -56,7 +55,7 @@ namespace iris_server.Controllers
                 bool patientAssignedToThisCarer = DbService.PatientIsAssigned(_ctx, apiKey, id);
                 if (patientAssignedToThisCarer)
                 {
-                    Patient patient = DbService.GetPatientById(_ctx, id).GetAwaiter().GetResult();
+                    Patient patient = (Patient)DbService.GetEntityByPrimaryKey(_ctx, id, DbService.Collection.patients).GetAwaiter().GetResult();
                     return Ok(patient.Notes);
                 }
                 else

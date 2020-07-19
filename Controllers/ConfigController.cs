@@ -56,7 +56,7 @@ namespace iris_server.Controllers
                 bool patientAssignedToThisCarer = DbService.PatientIsAssigned(_ctx, apiKey, id);
                 if (patientAssignedToThisCarer)
                 {
-                    Patient patient =  DbService.GetPatientById(_ctx, id).GetAwaiter().GetResult();
+                    Patient patient = (Patient)DbService.GetEntityByPrimaryKey(_ctx, id, DbService.Collection.patients).GetAwaiter().GetResult();
                     return Ok(patient.Config);
                 }
                 else

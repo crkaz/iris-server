@@ -32,7 +32,8 @@ namespace iris_server.Controllers
                 }
                 else
                 {
-                    bool emailAlreadyExists = DbService.GetCarerById(_ctx, email).GetAwaiter().GetResult() != null;
+                    Carer carer = (Carer)DbService.GetEntityByPrimaryKey(_ctx, email, DbService.Collection.carers).GetAwaiter().GetResult();
+                    bool emailAlreadyExists = carer != null;
                     if (emailAlreadyExists)
                     {
                         return BadRequest("Email address already in use.");
@@ -79,14 +80,15 @@ namespace iris_server.Controllers
         // ..api/carer/reset?id=
         [HttpGet]
         [Authorize(Roles = "admin")]
-        public IActionResult Reset([FromQuery(Name = "id")] string id)
+        public IActionResult Reset([FromQuery(Name = "id")] string email)
         {
             try
             {
-                bool carerExists = DbService.GetCarerById(_ctx, id).GetAwaiter().GetResult() != null;
+                Carer carer = (Carer)DbService.GetEntityByPrimaryKey(_ctx, email, DbService.Collection.carers).GetAwaiter().GetResult();
+                bool carerExists = carer != null;
                 if (carerExists)
                 {
-                    bool success = DbService.SendPasswordReset(_ctx, id);
+                    bool success = carer.SendPasswordReset();
                     if (success)
                     {
                         return Ok("Password reset sent successfully");
@@ -111,17 +113,18 @@ namespace iris_server.Controllers
         // Delete a user from the system, given their id.
         // ..api/carer/delete?id=
         [Authorize(Roles = "admin")]
-        public IActionResult Delete([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
+        public IActionResult Delete([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string email)
         {
             try
             {
-                bool carerExists = DbService.GetCarerById(_ctx, id).GetAwaiter().GetResult() != null;
+                Carer carer = (Carer)DbService.GetEntityByPrimaryKey(_ctx, email, DbService.Collection.carers).GetAwaiter().GetResult();
+                bool carerExists = carer != null;
                 if (carerExists)
                 {
-                    bool notDeletingSelf = !DbService.MatchCarerApiKeyWithId(_ctx, apiKey, id).GetAwaiter().GetResult();
+                    bool notDeletingSelf = carer.User.ApiKey != apiKey;
                     if (notDeletingSelf)
                     {
-                        bool success = DbService.DeleteCarerById(_ctx, id).GetAwaiter().GetResult();
+                        bool success = DbService.DeleteEntityByPrimaryKey(_ctx, email, DbService.Collection.carers).GetAwaiter().GetResult();
                         if (success)
                         {
                             return Ok("Carer deleted successfully.");

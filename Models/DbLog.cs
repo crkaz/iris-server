@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace iris_server.Models
 {
@@ -11,6 +9,8 @@ namespace iris_server.Models
         // DB fields.
         [Key] // Make primary key.
         public string Id { get; set; } // Primary key.
+        [ForeignKey("PatientId")]
+        public string PatientId { get; set; }
         public string What { get; set; }
         public string Ip { get; set; }
         public DateTime When { get; set; }

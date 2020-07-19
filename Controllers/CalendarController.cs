@@ -29,10 +29,11 @@ namespace iris_server.Controllers
                 bool validEntry = (start != null && end != null) && (start > DateTime.Now.AddMinutes(5)) && (start <= end);
                 if (validEntry)
                 {
-                    bool patientAssignedToThisCarer = DbService.PatientIsAssigned(_ctx, carerApiKey, entryId);
+                    CalendarEntry entry = (CalendarEntry)DbService.GetEntityByPrimaryKey(_ctx, entryId, DbService.Collection.calendars).GetAwaiter().GetResult();
+                    bool patientAssignedToThisCarer = DbService.PatientIsAssigned(_ctx, carerApiKey, entry.PatientId);
                     if (patientAssignedToThisCarer)
                     {
-                        bool success = DbService.AddCalendarEntry(_ctx, carerApiKey, entryId, jsonDict).GetAwaiter().GetResult();
+                        bool success = DbService.AddCalendarEntry(_ctx, entry.PatientId, entryId, jsonDict).GetAwaiter().GetResult();
                         if (success)
                         {
                             return Ok("Successfully added calendar entry.");
@@ -62,15 +63,15 @@ namespace iris_server.Controllers
         // Edit a calender entry given its id.
         // ..api/patient/calendar?id=
         [Authorize(Roles = "admin,formalcarer,informalcarer")]
-        public IActionResult Put([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string entryId, [FromBody] JObject calendarJson)
+        public IActionResult Put([FromHeader(Name = "ApiKey")] string carerApiKey, [FromQuery(Name = "id")] string entryId, [FromBody] JObject calendarJson)
         {
             try
             {
-                CalendarEntry entry = DbService.GetCalendarEntryById(_ctx, entryId).GetAwaiter().GetResult();
+                CalendarEntry entry = (CalendarEntry)DbService.GetEntityByPrimaryKey(_ctx, entryId, DbService.Collection.calendars).GetAwaiter().GetResult();
                 if (entry != null)
                 {
-                    bool carerAssignedToThisEntry = entry.Carer.Email == DbService.GetCarerByApiKey(_ctx, apiKey).Email;
-                    if (carerAssignedToThisEntry)
+                    bool carerAssignedToPatient = DbService.PatientIsAssigned(_ctx, carerApiKey, entry.PatientId);
+                    if (carerAssignedToPatient)
                     {
                         var jsonDict = JObject.FromObject(calendarJson).ToObject<Dictionary<string, object>>();
                         DateTime start = (DateTime)jsonDict["Start"];
@@ -115,14 +116,14 @@ namespace iris_server.Controllers
         // Delete a calender entry given its id.
         // ..api/patient/calendar?id=
         [Authorize(Roles = "admin,formalcarer,informalcarer")]
-        public IActionResult Delete([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
+        public IActionResult Delete([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string entryId)
         {
             try
             {
-                bool entryExists = DbService.GetCalendarEntryById(_ctx, id).GetAwaiter().GetResult() != null;
+                bool entryExists = DbService.GetCalendarEntryById(_ctx, entryId).GetAwaiter().GetResult() != null;
                 if (entryExists)
                 {
-                    bool success = DbService.DeleteCalendarEntryById(_ctx, id).GetAwaiter().GetResult();
+                    bool success = DbService.DeleteEntityByPrimaryKey(_ctx, entryId, DbService.Collection.calendars).GetAwaiter().GetResult();
                     if (success)
                     {
                         return Ok("Calendar entry deleted successfully.");
