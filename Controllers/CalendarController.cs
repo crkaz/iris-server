@@ -12,12 +12,12 @@ namespace iris_server.Controllers
     public class CalendarController : BaseController
     {
         /// Constructor injects the user context using dependency injection, via the BaseController. 
-        public CalendarController(DatabaseContext context) : base(context) { }
+        public CalendarController(DbCtx context) : base(context) { }
 
 
         // Add a new calender entry to the patient's calendar.
         // ..api/patient/calendar?id=
-        [Authorize(Roles = "admin,formalcarer,informalcarer")]
+        [Authorize(Roles = _roles.carer)]
         public IActionResult Post([FromHeader(Name = "ApiKey")] string carerApiKey, [FromQuery(Name = "id")] string entryId, [FromBody] JObject calendarJson)
         {
             try
@@ -62,7 +62,7 @@ namespace iris_server.Controllers
 
         // Edit a calender entry given its id.
         // ..api/patient/calendar?id=
-        [Authorize(Roles = "admin,formalcarer,informalcarer")]
+        [Authorize(Roles = _roles.carer)]
         public IActionResult Put([FromHeader(Name = "ApiKey")] string carerApiKey, [FromQuery(Name = "id")] string entryId, [FromBody] JObject calendarJson)
         {
             try
@@ -87,7 +87,7 @@ namespace iris_server.Controllers
                             }
                             else
                             {
-                                return BadRequest("Failed to add calendar entry.");
+                                return BadRequest("Failed to update calendar entry.");
                             }
                         }
                         else
@@ -115,8 +115,8 @@ namespace iris_server.Controllers
 
         // Delete a calender entry given its id.
         // ..api/patient/calendar?id=
-        [Authorize(Roles = "admin,formalcarer,informalcarer")]
-        public IActionResult Delete([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string entryId)
+        [Authorize(Roles = _roles.carer)]
+        public IActionResult Delete([FromHeader(Name = "ApiKey")] string carerApiKey, [FromQuery(Name = "id")] string entryId)
         {
             try
             {
@@ -130,7 +130,7 @@ namespace iris_server.Controllers
                     }
                     else
                     {
-                        return BadRequest("Failed to delete carer.");
+                        return BadRequest("Failed to delete calendar entry.");
                     }
                 }
                 else
@@ -148,12 +148,12 @@ namespace iris_server.Controllers
         // Get all future calender entries for a patient between todays date.
         // ..api/patient/calendar?id=..&date=
         [HttpGet]
-        [Authorize(Roles = "admin,formalcarer,informalcarer")]
-        public IActionResult CarerGet([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string patientId, [FromQuery(Name = "page")] string page, [FromQuery(Name = "nitems")] string nItems)
+        [Authorize(Roles = _roles.carer)]
+        public IActionResult CarerGet([FromHeader(Name = "ApiKey")] string carerApiKey, [FromQuery(Name = "id")] string patientId, [FromQuery(Name = "page")] string page, [FromQuery(Name = "nitems")] string nItems)
         {
             try
             {
-                bool patientAssignedToCarer = DbService.PatientIsAssigned(_ctx, apiKey, patientId);
+                bool patientAssignedToCarer = DbService.PatientIsAssigned(_ctx, carerApiKey, patientId);
                 if (patientAssignedToCarer)
                 {
                     ICollection<CalendarEntry> entries = DbService.GetCalendarEntries(_ctx, patientId, page, nItems).GetAwaiter().GetResult();
@@ -176,12 +176,12 @@ namespace iris_server.Controllers
         // Get all calender entries from 'today' and 'tomorrow'.
         // ..api/patient/calendar?id=..&date=
         [HttpGet]
-        [Authorize(Roles = "patient")]
-        public IActionResult PatientGet([FromHeader(Name = "ApiKey")] string apiKey)
+        [Authorize(Roles = _roles.patient)]
+        public IActionResult PatientGet([FromHeader(Name = "ApiKey")] string patientApiKey)
         {
             try
             {
-                ICollection<CalendarEntry> entries = DbService.GetCalendarEntries(_ctx, apiKey);
+                ICollection<CalendarEntry> entries = DbService.GetCalendarEntries(_ctx, patientApiKey);
                 string entriesJson = JsonConvert.SerializeObject(entries);
                 return Ok(entriesJson);
                 // Return logs as a paginated json collection

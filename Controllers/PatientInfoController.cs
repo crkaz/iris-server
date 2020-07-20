@@ -10,12 +10,12 @@ namespace iris_server.Controllers
     public class PatientInfoController : BaseController
     {
         /// Constructor injects the user context using dependency injection, via the BaseController. 
-        public PatientInfoController(DatabaseContext context) : base(context) { }
+        public PatientInfoController(DbCtx context) : base(context) { }
 
 
         // Edit a patient's 'notes'.
         // ..api/patientinfo/put?id=
-        [Authorize(Roles = "admin,formalcarer,informalcarer")]
+        [Authorize(Roles = _roles.carer)]
         public IActionResult Put([FromHeader(Name = "ApiKey")] string carerApiKey, [FromQuery(Name = "id")] string patientId, [FromBody] JObject notesJson)
         {
             try
@@ -47,7 +47,7 @@ namespace iris_server.Controllers
 
         // Get a patient's 'notes'.
         // ..patientinfo/get/info?id=
-        [Authorize(Roles = "admin,formalcarer,informalcarer")]
+        [Authorize(Roles = _roles.carer)]
         public IActionResult Get([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
         {
             try

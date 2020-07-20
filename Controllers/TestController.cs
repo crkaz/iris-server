@@ -8,7 +8,7 @@ namespace iris_server.Controllers
     public class TestController : BaseController
     {
         /// Constructor injects the user context using dependency injection, via the BaseController. 
-        public TestController(DatabaseContext context) : base(context) { }
+        public TestController(DbCtx context) : base(context) { }
 
 
         // Check if the host is available.
@@ -21,7 +21,7 @@ namespace iris_server.Controllers
 
         // Used to test that endpoints with the patient role reject all other requests.
         [HttpGet]
-        [Authorize(Roles = "patient")]
+        [Authorize(Roles = _roles.patient)]
         public IActionResult AuthFilterPatient()
         {
             return Ok("Patient auth works");
@@ -48,7 +48,7 @@ namespace iris_server.Controllers
 
         // Used to test that endpoints with the admin role rejects all other requests.
         [HttpGet]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = _roles.admin)]
         public IActionResult AuthFilterAdmin()
         {
             return Ok("Admin auth works");
@@ -66,7 +66,7 @@ namespace iris_server.Controllers
 
         // Used to test that logging middleware works by returning the number of dblogs.
         [HttpGet]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = _roles.admin)]
         public int NLogs()
         {
             return _ctx.DbLogs.Count();

@@ -33,7 +33,7 @@ namespace iris_server
             //services.AddResponseCaching();
 
             // Initialise database context for dependency injection via BaseController.
-            services.AddDbContext<Models.DatabaseContext>();
+            services.AddDbContext<Models.DbCtx>();
 
             services.AddMvc(options =>
             {

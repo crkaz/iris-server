@@ -1,9 +1,12 @@
 ﻿using iris_server.Models;
 using iris_server.Models.Interfaces;
 using Microsoft.AspNetCore.Http;
+using Microsoft.CodeAnalysis;
+using Microsoft.EntityFrameworkCore.Storage;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -11,10 +14,10 @@ namespace iris_server.Services
 {
     public static class DbService
     {
-        public enum Collection { users, patients, carers, calendars, activitylogs };
+        public enum Collection { users, patients, carers, calendars, activitylogs, stickies };
 
 
-        public static async Task<IEntity> GetEntityByPrimaryKey(DatabaseContext ctx, string key, Collection collection)
+        public static async Task<IEntity> GetEntityByPrimaryKey(DbCtx ctx, string key, Collection collection)
         {
             try
             {
@@ -28,6 +31,8 @@ namespace iris_server.Services
                         return await ctx.Carers.FindAsync(key);
                     case Collection.calendars:
                         return await ctx.Calendars.FindAsync(key);
+                    case Collection.stickies:
+                        return await ctx.Stickies.FindAsync(key);
                     default:
                         throw new Exception("Unknown table.");
                 }
@@ -41,7 +46,7 @@ namespace iris_server.Services
         }
 
 
-        public static IEntity GetEntityByForeignKey(DatabaseContext ctx, string key, Collection collection)
+        public static IEntity GetEntityByForeignKey(DbCtx ctx, string key, Collection collection)
         {
             try
             {
@@ -74,7 +79,7 @@ namespace iris_server.Services
         }
 
 
-        public static async Task<bool> DeleteEntityByPrimaryKey(DatabaseContext ctx, string key, Collection collection)
+        public static async Task<bool> DeleteEntityByPrimaryKey(DbCtx ctx, string key, Collection collection)
         {
             try
             {
@@ -93,6 +98,9 @@ namespace iris_server.Services
                         case Collection.calendars:
                             ctx.Calendars.Remove(e as CalendarEntry);
                             break;
+                        case Collection.stickies:
+                            ctx.Stickies.Remove(e as StickyNote);
+                            break;
                         default:
                             throw new Exception("Unknown table.");
                     }
@@ -109,9 +117,26 @@ namespace iris_server.Services
             return false;
         }
 
+        // TODO: Implement visitor pattern.
+        /// TODO: MOVE
+        public static bool PatientIsAssigned(DbCtx ctx, string carerId, string patientId)
+        {
+            try
+            {
+                Carer carer = (Carer)GetEntityByForeignKey(ctx, carerId, Collection.carers);
+                bool patientAssignedToThisCarer = carer.AssignedPatientIds.Contains(patientId);
+                return patientAssignedToThisCarer;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return false;
+        }
 
-        // TODO: MOVE
-        public static async Task<bool> UpdatePatientNotes(DatabaseContext ctx, string patientId, JObject notesJson)
+
+        /// TODO: MOVE
+        public static async Task<bool> UpdatePatientNotes(DbCtx ctx, string patientId, JObject notesJson)
         {
             try
             {
@@ -156,8 +181,8 @@ namespace iris_server.Services
             }
         }
 
-        // TODO: IMPLEMENT
-        public static async Task<bool> UpdatePatientConfig(DatabaseContext ctx, string patientId, JObject configJson)
+        /// TODO: IMPLEMENT
+        public static async Task<bool> UpdatePatientConfig(DbCtx ctx, string patientId, JObject configJson)
         {
             try
             {
@@ -204,8 +229,8 @@ namespace iris_server.Services
         }
 
 
-        // TODO: MOVE
-        public static async Task<bool> MessagePatient(DatabaseContext ctx, string carerApiKey, string patientId, JObject messageJson)
+        /// TODO: MOVE
+        public static async Task<bool> MessagePatient(DbCtx ctx, string carerApiKey, string patientId, JObject messageJson)
         {
             try
             {
@@ -236,7 +261,7 @@ namespace iris_server.Services
         }
 
 
-        public static async Task<bool> CreatePatientActivityLog(DatabaseContext ctx, string patientApiKey, JObject logJson)
+        public static async Task<bool> CreatePatientActivityLog(DbCtx ctx, string patientApiKey, JObject logJson)
         {
             try
             {
@@ -259,25 +284,8 @@ namespace iris_server.Services
         }
 
 
-        // TODO: MOVE
-        public static bool PatientIsAssigned(DatabaseContext ctx, string carerApiKey, string patientId)
-        {
-            try
-            {
-                Carer carer = (Carer)GetEntityByForeignKey(ctx, carerApiKey, Collection.carers);
-                bool patientAssignedToThisCarer = carer.AssignedPatientIds.Contains(patientId);
-                return patientAssignedToThisCarer;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-            return false;
-        }
-
-
-        // TODO: MOVE
-        public static async Task<bool> CreateUser(DatabaseContext ctx, string primaryKey, User.UserRole role)
+        /// TODO: MOVE
+        public static async Task<bool> CreateUser(DbCtx ctx, string primaryKey, User.UserRole role)
         {
             try
             {
@@ -306,8 +314,8 @@ namespace iris_server.Services
             return false;
         }
 
-        // TODO: MOVE
-        public static async Task<bool> AddCalendarEntry(DatabaseContext ctx, string patientId, string entryId, Dictionary<string, object> jsonDict)
+        /// TODO: MOVE
+        public static async Task<bool> AddCalendarEntry(DbCtx ctx, string patientId, string entryId, Dictionary<string, object> jsonDict)
         {
             try
             {
@@ -330,8 +338,8 @@ namespace iris_server.Services
         }
 
 
-        // TODO: MOVE
-        public static async Task<bool> UpdateCalendarEntry(DatabaseContext ctx, string calendarId, Dictionary<string, object> jsonDict)
+        /// TODO: MOVE
+        public static async Task<bool> UpdateCalendarEntry(DbCtx ctx, string calendarId, Dictionary<string, object> jsonDict)
         {
             try
             {
@@ -386,8 +394,8 @@ namespace iris_server.Services
         }
 
 
-        // TODO: MOVE
-        public static async Task<ICollection<CalendarEntry>> GetCalendarEntries(DatabaseContext ctx, string patientId, string pageStr, string nItemsStr)
+        /// TODO: MOVE
+        public static async Task<ICollection<CalendarEntry>> GetCalendarEntries(DbCtx ctx, string patientId, string pageStr, string nItemsStr)
         {
             try
             {
@@ -410,8 +418,8 @@ namespace iris_server.Services
         }
 
 
-        // TODO: MOVE
-        public static async Task<ICollection<ActivityLog>> GetLogs(DatabaseContext ctx, string patientId, string pageStr, string nItemsStr)
+        /// TODO: MOVE
+        public static async Task<ICollection<ActivityLog>> GetLogs(DbCtx ctx, string patientId, string pageStr, string nItemsStr)
         {
             try
             {
@@ -434,8 +442,8 @@ namespace iris_server.Services
         }
 
 
-        // TODO: MOVE
-        public static ICollection<CalendarEntry> GetCalendarEntries(DatabaseContext ctx, string patientApiKey)
+        /// TODO: MOVE
+        public static ICollection<CalendarEntry> GetCalendarEntries(DbCtx ctx, string patientApiKey)
         {
             try
             {
@@ -451,5 +459,148 @@ namespace iris_server.Services
             return null;
         }
 
+
+        /// TODO: MOVE
+        public static ICollection<StickyNote> GetStickyNotes(DbCtx ctx, string patientApiKey)
+        {
+            try
+            {
+                Patient patient = (Patient)GetEntityByForeignKey(ctx, patientApiKey, Collection.patients);
+                ICollection<StickyNote> stickies = patient.Stickies;//.ToList();
+                return stickies;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return null;
+        }
+
+
+        /// TODO: MOVE
+        public static async Task<bool> AllocatePatient(DbCtx ctx, JObject patientAndCarerId)
+        {
+            try
+            {
+                string patientId = (string)patientAndCarerId["patient"];
+                string carerEmail = (string)patientAndCarerId["carer"];
+                bool assign = (bool)patientAndCarerId["assign"]; // Whether to assign or unassign.
+                Patient patient = (Patient)await GetEntityByPrimaryKey(ctx, patientId, Collection.patients);
+                Carer carer = (Carer)await GetEntityByPrimaryKey(ctx, carerEmail, Collection.carers);
+                bool patientAlreadyAssigned = carer.AssignedPatientIds.Contains(patientId);
+                if (assign)
+                {
+                    // Assign the patient to the carer if they are not assigned.
+                    if (!patientAlreadyAssigned)
+                    {
+                        carer.AssignedPatientIds.Add(patientId);
+                        await ctx.SaveChangesAsync();
+                    }
+                }
+                else
+                {
+                    // Unassign the patient from the carer if they are assigned..
+                    if (patientAlreadyAssigned)
+                    {
+                        if (patientId != "testpatient") // Don't remove test record.
+                            carer.AssignedPatientIds.ToList().Remove(patientId);
+                        await ctx.SaveChangesAsync();
+                    }
+                }
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return false;
+        }
+
+
+        /// TODO: MOVE
+        public static async Task<bool> ChangeCarerPermission(DbCtx ctx, JObject carerAndRole)
+        {
+            try
+            {
+                string carerEmail = (string)carerAndRole["email"];
+                string role = (string)carerAndRole["role"];
+                Carer carer = (Carer)await GetEntityByPrimaryKey(ctx, carerEmail, Collection.carers);
+
+                carer.User.Role = role;
+                await ctx.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return false;
+        }
+
+
+        /// TODO: MOVE
+        public static async Task<bool> AddStickyNote(DbCtx ctx, string patientApiKey, JObject stickyJson)
+        {
+            try
+            {
+                string stickyContent = (string)stickyJson["content"];
+                float stickyScale = (float)stickyJson["scale"];
+                if (!(string.IsNullOrWhiteSpace(stickyContent) || stickyScale == 0))
+                {
+                    Patient patient = (Patient)GetEntityByForeignKey(ctx, patientApiKey, Collection.patients);
+                    StickyNote stickyNote = new StickyNote() { PatientId = patient.Id, Scale = stickyScale, Content = stickyContent };
+                    patient.Stickies.Add(stickyNote);
+                    await ctx.SaveChangesAsync();
+                    return true;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return false;
+        }
+
+
+        public static async Task<bool> UpdateStickyNote(DbCtx ctx, string stickyId, JObject stickyJson)
+        {
+            try
+            {
+                StickyNote sticky = (StickyNote)await GetEntityByPrimaryKey(ctx, stickyId, Collection.stickies);
+                var jsonDict = JObject.FromObject(stickyJson).ToObject<Dictionary<string, object>>();
+                bool changes = false;
+
+                foreach (string key in jsonDict.Keys)
+                {
+                    switch (key.ToLower())
+                    {
+                        case "content":
+                            string content = (string)jsonDict[key];
+                            sticky.Content = content;
+                            changes = true;
+                            break;
+
+                        case "scale":
+                            float scale = (float)jsonDict[key];
+                            sticky.Scale = scale;
+                            changes = true;
+                            break;
+                    }
+                }
+
+                if (changes)
+                {
+                    await ctx.SaveChangesAsync();
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return false;
+        }
     }
 }

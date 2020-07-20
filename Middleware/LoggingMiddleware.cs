@@ -15,7 +15,7 @@ namespace iris_server.Middleware
         }
 
         // Main code middleware code.
-        public async Task InvokeAsync(HttpContext httpContext, DatabaseContext ctx)
+        public async Task InvokeAsync(HttpContext httpContext, DbCtx ctx)
         {
             string apiKey = httpContext.Request.Headers["ApiKey"];
             string requestedEndpoint = httpContext.Request.Path;

@@ -1,9 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using iris_server.Models.Interfaces;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace iris_server.Models
 {
-    public class StickyNote
+    public class StickyNote : IEntity
     {
         // DB fields.
         [Key] // Make primary key via EF convention.

@@ -11,12 +11,12 @@ namespace iris_server.Controllers
     public class ConfigController : BaseController
     {
         /// Constructor injects the user context using dependency injection, via the BaseController. 
-        public ConfigController(DatabaseContext context) : base(context) { }
+        public ConfigController(DbCtx context) : base(context) { }
 
 
         // Modify a parameter of the patient's device configuration.
         // ..api/config/put?id=
-        [Authorize(Roles = "admin,formalcarer,informalcarer")]
+        [Authorize(Roles = _roles.carer)]
         public IActionResult Put([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromBody] JObject configJson)
         {
             try
@@ -48,7 +48,7 @@ namespace iris_server.Controllers
 
         // Get the patient's device configuration.
         // ..api/config/get?id=
-        [Authorize(Roles = "admin,formalcarer,informalcarer")]
+        [Authorize(Roles = _roles.carer)]
         public IActionResult Get([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
         {
             try

@@ -9,7 +9,7 @@ using iris_server.Models;
 
 namespace iris_server.Migrations
 {
-    [DbContext(typeof(DatabaseContext))]
+    [DbContext(typeof(DbCtx))]
     [Migration("20200720001347_m0")]
     partial class m0
     {

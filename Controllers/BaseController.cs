@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using iris_server.Models;
+using System.Collections.Generic;
 
 /// <summary>
 /// Base controller manages route format for all controllers and enforces
@@ -11,9 +12,16 @@ namespace iris_server.Controllers
     [ApiController]
     public abstract class BaseController : ControllerBase
     {
-        protected readonly DatabaseContext _ctx;
+        protected struct _roles
+        {
+            public const string all = "admin,informalcarer,formalcarer,patient";
+            public const string carer = "admin,informalcarer,formalcarer";
+            public const string admin = "admin";
+            public const string patient = "patient";
+        };
+        protected readonly DbCtx _ctx;
 
-        public BaseController(DatabaseContext context)
+        public BaseController(DbCtx context)
         {
             _ctx = context;
         }

@@ -7,9 +7,9 @@ using System.Collections.Generic;
 
 namespace iris_server.Models
 {
-    public class DatabaseContext : DbContext
+    public class DbCtx : DbContext
     {
-        public DatabaseContext() : base() { }
+        public DbCtx() : base() { }
 
         // Database tables.
         public DbSet<User> Users { get; set; }

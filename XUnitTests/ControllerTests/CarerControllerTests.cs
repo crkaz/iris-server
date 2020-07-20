@@ -99,6 +99,7 @@ namespace XUnitTests
         }
 
 
+        #region Reset carer password (using firebase library in frontend instead).
         // USE FIRBASE IN FRONTEND INSTEAD
         //[Fact]
         //public async Task ResetCarerEmailOkRequest()
@@ -161,6 +162,7 @@ namespace XUnitTests
         //    Assert.Equal(expectedStatusCode, actualStatusCode);
         //    Assert.Equal(expectedResponse, actualResponse);
         //}
+        #endregion
 
 
         [Fact]
@@ -197,6 +199,164 @@ namespace XUnitTests
 
             // act
             HttpResponseMessage response = await testClient.GetRequest(endpoint);
+            string actualResponse = await response.Content.ReadAsStringAsync();
+            HttpStatusCode actualStatusCode = response.StatusCode;
+
+            // assert
+            Assert.Equal(expectedStatusCode, actualStatusCode);
+            Assert.Equal(expectedResponse, actualResponse);
+        }
+
+
+        [Fact]
+        public async Task AllocateOkRequest_Assign()
+        {
+            // arrange
+            TestClient testClient = new TestClient();
+            const string endpoint = "carer/allocate/?id=testpatient";
+            string requestBody = JsonConvert.SerializeObject(new Dictionary<string, object>() { { "patient", "testpatient" }, { "carer", "testcarer" }, { "assign", true } });
+            const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
+            const string expectedResponse = "Assigned successfully.";
+            testClient.AddHeader("ApiKey", "testcarer");
+
+            // act
+            HttpResponseMessage response = await testClient.PutRequest(endpoint, body: requestBody);
+            string actualResponse = await response.Content.ReadAsStringAsync();
+            HttpStatusCode actualStatusCode = response.StatusCode;
+
+            // assert
+            Assert.Equal(expectedStatusCode, actualStatusCode);
+            Assert.Equal(expectedResponse, actualResponse);
+        }
+
+
+        [Fact]
+        public async Task AllocateOkRequest_Unassign()
+        {
+            // arrange
+            TestClient testClient = new TestClient();
+            const string endpoint = "carer/allocate/?id=testpatient";
+            string requestBody = JsonConvert.SerializeObject(new Dictionary<string, object>() { { "patient", "testpatient" }, { "carer", "testcarer" }, { "assign", false } });
+            const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
+            const string expectedResponse = "Unassigned successfully.";
+            testClient.AddHeader("ApiKey", "testcarer");
+
+            // act
+            HttpResponseMessage response = await testClient.PutRequest(endpoint, body: requestBody);
+            string actualResponse = await response.Content.ReadAsStringAsync();
+            HttpStatusCode actualStatusCode = response.StatusCode;
+
+            // assert
+            Assert.Equal(expectedStatusCode, actualStatusCode);
+            Assert.Equal(expectedResponse, actualResponse);
+        }
+
+
+        // Cannot update a calendar entry that does not exist.
+        [Fact]
+        public async Task AllocateNotFound_Patient()
+        {
+            // arrange
+            TestClient testClient = new TestClient();
+            const string endpoint = "carer/allocate/?id=testpatient";
+            string requestBody = JsonConvert.SerializeObject(new Dictionary<string, object>() { { "patient", "thisdoesntexist" }, { "carer", "testcarer" }, { "assign", false } });
+            const HttpStatusCode expectedStatusCode = HttpStatusCode.NotFound;
+            const string expectedResponse = "Either the patient or carer does not exist.";
+            testClient.AddHeader("ApiKey", "testcarer");
+
+            // act
+            HttpResponseMessage response = await testClient.PutRequest(endpoint, body: requestBody);
+            string actualResponse = await response.Content.ReadAsStringAsync();
+            HttpStatusCode actualStatusCode = response.StatusCode;
+
+            // assert
+            Assert.Equal(expectedStatusCode, actualStatusCode);
+            Assert.Equal(expectedResponse, actualResponse);
+        }
+
+
+        // Cannot update a calendar entry that does not exist.
+        [Fact]
+        public async Task AllocateNotFound_Carer()
+        {
+            // arrange
+            TestClient testClient = new TestClient();
+            const string endpoint = "carer/allocate/?id=testpatient";
+            string requestBody = JsonConvert.SerializeObject(new Dictionary<string, object>() { { "patient", "testpatient" }, { "carer", "thisdoesntexist" }, { "assign", false } });
+            const HttpStatusCode expectedStatusCode = HttpStatusCode.NotFound;
+            const string expectedResponse = "Either the patient or carer does not exist.";
+            testClient.AddHeader("ApiKey", "testcarer");
+
+            // act
+            HttpResponseMessage response = await testClient.PutRequest(endpoint, body: requestBody);
+            string actualResponse = await response.Content.ReadAsStringAsync();
+            HttpStatusCode actualStatusCode = response.StatusCode;
+
+            // assert
+            Assert.Equal(expectedStatusCode, actualStatusCode);
+            Assert.Equal(expectedResponse, actualResponse);
+        }
+
+
+        [Fact]
+        public async Task RoleOkRequest()
+        {
+            // arrange
+            TestClient testClient = new TestClient();
+            const string endpoint = "carer/role";
+            string requestBody = JsonConvert.SerializeObject(new Dictionary<string, object>() { { "carer", "testcarer" }, { "role", "admin" } });
+            const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
+            const string expectedResponse = "Role changed successfully.";
+            testClient.AddHeader("ApiKey", "testcarer");
+
+            // act
+            HttpResponseMessage response = await testClient.PutRequest(endpoint, body: requestBody);
+            string actualResponse = await response.Content.ReadAsStringAsync();
+            HttpStatusCode actualStatusCode = response.StatusCode;
+
+            // assert
+            Assert.Equal(expectedStatusCode, actualStatusCode);
+            Assert.Equal(expectedResponse, actualResponse);
+        }
+
+
+        // Cannot update a calendar entry that does not exist.
+        [Fact]
+        public async Task RoleNotFound_Role()
+        {
+            // arrange
+            TestClient testClient = new TestClient();
+            const string endpoint = "carer/role";
+            string requestBody = JsonConvert.SerializeObject(new Dictionary<string, object>() { { "carer", "testcarer" }, { "role", "doesnotexist" } });
+            const HttpStatusCode expectedStatusCode = HttpStatusCode.NotFound;
+            const string expectedResponse = "Invalid role specified.";
+            testClient.AddHeader("ApiKey", "testcarer");
+
+            // act
+            HttpResponseMessage response = await testClient.PutRequest(endpoint, body: requestBody);
+            string actualResponse = await response.Content.ReadAsStringAsync();
+            HttpStatusCode actualStatusCode = response.StatusCode;
+
+            // assert
+            Assert.Equal(expectedStatusCode, actualStatusCode);
+            Assert.Equal(expectedResponse, actualResponse);
+        }
+
+
+        // Cannot update a calendar entry that does not exist.
+        [Fact]
+        public async Task RoleNotFound_Carer()
+        {
+            // arrange
+            TestClient testClient = new TestClient();
+            const string endpoint = "carer/role";
+            string requestBody = JsonConvert.SerializeObject(new Dictionary<string, object>() { { "carer", "doesnotexist" }, { "role", "admin" } });
+            const HttpStatusCode expectedStatusCode = HttpStatusCode.NotFound;
+            const string expectedResponse = "Carer does not exist.";
+            testClient.AddHeader("ApiKey", "testcarer");
+
+            // act
+            HttpResponseMessage response = await testClient.PutRequest(endpoint, body: requestBody);
             string actualResponse = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 

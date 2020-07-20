@@ -13,12 +13,12 @@ namespace iris_server.Controllers
     public class MessageController : BaseController
     {
         /// Constructor injects the user context using dependency injection, via the BaseController. 
-        public MessageController(DatabaseContext context) : base(context) { }
+        public MessageController(DbCtx context) : base(context) { }
 
 
         // Send a message to a patient.
         // ..api/message/post?id=
-        [Authorize(Roles = "admin,formalcarer,informalcarer")]
+        [Authorize(Roles = _roles.carer)]
         public IActionResult Post([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromBody] JObject titleAndMessage)
         {
             try
@@ -50,7 +50,7 @@ namespace iris_server.Controllers
 
         // Get a patients unread messages.
         // ..api/message/get?id=
-        [Authorize(Roles = "patient")]
+        [Authorize(Roles = _roles.patient)]
         public IActionResult Get([FromHeader(Name = "ApiKey")] string apiKey)
         {
             try

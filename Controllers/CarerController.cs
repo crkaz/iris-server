@@ -4,18 +4,21 @@ using iris_server.Models;
 using System;
 using Newtonsoft.Json;
 using iris_server.Services;
+using Newtonsoft.Json.Linq;
+using System.Linq;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace iris_server.Controllers
 {
     public class CarerController : BaseController
     {
         /// Constructor injects the user context using dependency injection, via the BaseController. 
-        public CarerController(DatabaseContext context) : base(context) { }
+        public CarerController(DbCtx context) : base(context) { }
 
 
         // Create a new user in the system.
         // ..api/carer/post
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = _roles.admin)]
         public IActionResult Post([FromBody] string email)
         {
             try
@@ -25,27 +28,18 @@ namespace iris_server.Controllers
                 {
                     return BadRequest("Invalid email format.");
                 }
-                else
+                Carer carer = (Carer)DbService.GetEntityByPrimaryKey(_ctx, email, DbService.Collection.carers).GetAwaiter().GetResult();
+                bool emailAlreadyExists = carer != null;
+                if (emailAlreadyExists)
                 {
-                    Carer carer = (Carer)DbService.GetEntityByPrimaryKey(_ctx, email, DbService.Collection.carers).GetAwaiter().GetResult();
-                    bool emailAlreadyExists = carer != null;
-                    if (emailAlreadyExists)
-                    {
-                        return BadRequest("Email address already in use.");
-                    }
-                    else
-                    {
-                        bool success = DbService.CreateUser(_ctx, email, Models.User.UserRole.informalcarer).GetAwaiter().GetResult();
-                        if (success)
-                        {
-                            return Ok("New carer added successfully.");
-                        }
-                        else
-                        {
-                            return BadRequest("Failed to create new carer.");
-                        }
-                    }
+                    return BadRequest("Email address already in use.");
                 }
+                bool success = DbService.CreateUser(_ctx, email, Models.User.UserRole.informalcarer).GetAwaiter().GetResult();
+                if (success)
+                {
+                    return Ok("New carer added successfully.");
+                }
+                return BadRequest("Failed to create new carer.");
             }
             catch (Exception e)
             {
@@ -56,7 +50,7 @@ namespace iris_server.Controllers
         // Return the collection of users registered in the system.
         // ..api/carer/get
         [HttpGet]
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = _roles.admin)]
         public IActionResult Get()
         {
             try
@@ -71,10 +65,11 @@ namespace iris_server.Controllers
         }
 
 
+        #region Password reset endpoint: changed to use firebase library in frontend instead.
         //// Send a password-reset email to the specified user.
         //// ..api/carer/reset?id=
         //[HttpGet]
-        //[Authorize(Roles = "admin")]
+        //[Authorize(Roles = _roles.admin)]
         //public IActionResult Reset([FromQuery(Name = "id")] string email)
         //{
         //    try
@@ -103,11 +98,12 @@ namespace iris_server.Controllers
         //        return BadRequest(e);
         //    }
         //}
+        #endregion
 
 
         // Delete a user from the system, given their id.
         // ..api/carer/delete?id=
-        [Authorize(Roles = "admin")]
+        [Authorize(Roles = _roles.admin)]
         public IActionResult Delete([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string email)
         {
             try
@@ -124,20 +120,11 @@ namespace iris_server.Controllers
                         {
                             return Ok("Carer deleted successfully.");
                         }
-                        else
-                        {
-                            return BadRequest("Failed to delete carer.");
-                        }
+                        return BadRequest("Failed to delete carer.");
                     }
-                    else
-                    {
-                        return Unauthorized("Accounts must be deleted by an admin other than yourself.");
-                    }
+                    return Unauthorized("Accounts must be deleted by an admin other than yourself.");
                 }
-                else
-                {
-                    return NotFound("Could not find a carer with that email.");
-                }
+                return NotFound("Could not find a carer with that email.");
             }
             catch (Exception e)
             {
@@ -146,33 +133,67 @@ namespace iris_server.Controllers
         }
 
 
-        // Assign a patient to a carer as specified in the body.
-        // ..api/carer/assign
-        [HttpPost]
-        [Authorize(Roles = "admin")]
-        public IActionResult Assign([FromBody] string patientAndCarerId)
+        // Assign/unassign a patient to/from a carer as specified in the body.
+        // ..api/carer/allocate
+        [HttpPut]
+        [Authorize(Roles = _roles.admin)]
+        public IActionResult Allocate([FromBody] JObject patientAndCarerId)
         {
-            return Ok("Endpoint works.");
+            try
+            {
+                string patientId = (string)patientAndCarerId["patient"];
+                string carerEmail = (string)patientAndCarerId["carer"];
+                bool assign = (bool)patientAndCarerId["assign"]; // Whether to assign or unassign.
+                Patient patient = (Patient)DbService.GetEntityByPrimaryKey(_ctx, patientId, DbService.Collection.patients).GetAwaiter().GetResult();
+                Carer carer = (Carer)DbService.GetEntityByPrimaryKey(_ctx, carerEmail, DbService.Collection.carers).GetAwaiter().GetResult();
+
+                if (carer != null && patient != null)
+                {
+                    bool success = DbService.AllocatePatient(_ctx, patientAndCarerId).GetAwaiter().GetResult();
+                    if (success)
+                    {
+                        if (assign)
+                            return Ok("Assigned successfully.");
+                        return Ok("Unassigned successfully.");
+                    }
+                    return BadRequest("Failed.");
+                }
+                return NotFound("Either the patient or carer does not exist.");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
         }
 
 
-        // Unassign a patient from a carer as specified in the body.
-        // ..api/carer/unassign
-        [HttpPost]
-        [Authorize(Roles = "admin")]
-        public IActionResult Unassign([FromBody] string patientAndCarerId)
-        {
-            return Ok("Endpoint works.");
-        }
-
-
-        // Change the role/permissions of the user specified in the body.
+        // Change the role/permissions of the carer as specified in the body.
         // ..api/carer/role
         [HttpPut]
-        [Authorize(Roles = "admin")]
-        public IActionResult Role([FromBody] string carerAndRole)
+        [Authorize(Roles = _roles.admin)]
+        public IActionResult Role([FromBody] JObject carerAndRole)
         {
-            return Ok("Endpoint works.");
+            try
+            {
+                string carerEmail = (string)carerAndRole["carer"];
+                string roleStr = (string)carerAndRole["role"];
+                Carer carer = (Carer)DbService.GetEntityByPrimaryKey(_ctx, carerEmail, DbService.Collection.carers).GetAwaiter().GetResult();
+                if (carer != null)
+                {
+                    bool roleExists = Enum.GetNames(typeof(User.UserRole)).Contains(roleStr); ;
+                    if (roleExists)
+                    {
+                        DbService.ChangeCarerPermission(_ctx, carerAndRole).GetAwaiter().GetResult();
+                        return Ok("Role changed successfully.");
+                    }
+                    return NotFound("Invalid role specified.");
+                }
+                return NotFound("Carer does not exist.");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
         }
     }
 }
