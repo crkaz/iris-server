@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using iris_server.Models;
-using System.Collections.Generic;
 
 /// <summary>
 /// Base controller manages route format for all controllers and enforces

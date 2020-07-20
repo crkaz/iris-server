@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using iris_server.Models;
 using iris_server.Services;
 using Microsoft.AspNetCore.Authorization;

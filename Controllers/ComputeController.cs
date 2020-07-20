@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using iris_server.Models;
 using Newtonsoft.Json.Linq;
-using iris_server.Services;
 
 namespace iris_server.Controllers
 {
