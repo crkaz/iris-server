@@ -6,6 +6,7 @@ using System;
 using iris_server.Services;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using System.Linq;
 
 namespace iris_server.Controllers
 {
@@ -24,6 +25,10 @@ namespace iris_server.Controllers
             {
                 ICollection<StickyNote> entries = DbService.GetStickyNotes(_ctx, apiKey);
                 string stickiesJson = JsonConvert.SerializeObject(entries);
+                if (stickiesJson == "[]")
+                {
+                    return NotFound("Patient has no sticky notes.");
+                }
                 return Ok(stickiesJson);
                 // Return stickies as a json collection
             }
@@ -41,17 +46,12 @@ namespace iris_server.Controllers
         {
             try
             {
-                Patient p = (Patient)DbService.GetEntityByForeignKey(_ctx, patientApiKey, DbService.Collection.patients);
-                if (p != null)
+                bool success = DbService.AddStickyNote(_ctx, patientApiKey, stickyJson).GetAwaiter().GetResult();
+                if (success)
                 {
-                    bool success = DbService.AddStickyNote(_ctx, patientApiKey, stickyJson).GetAwaiter().GetResult();
-                    if (success)
-                    {
-                        return Ok("Successfully added sticky.");
-                    }
-                    return BadRequest("Failed to add sticky.");
+                    return Ok("Successfully added sticky note.");
                 }
-                return Unauthorized("Invalid api key.");
+                return BadRequest("Failed to add sticky note.");
             }
             catch (Exception e)
             {
@@ -67,27 +67,18 @@ namespace iris_server.Controllers
         {
             try
             {
-                StickyNote sticky = (StickyNote)DbService.GetEntityByPrimaryKey(_ctx, stickyId, DbService.Collection.stickies).GetAwaiter().GetResult();
-                if (sticky != null)
+                Patient patient = (Patient)DbService.GetEntityByForeignKey(_ctx, apiKey, DbService.Collection.patients);
+                bool patientOwnsSticky = patient.Stickies.Where(s => s.Id == stickyId).Count() == 1;
+                if (patientOwnsSticky)
                 {
-                    Patient patient = (Patient)DbService.GetEntityByForeignKey(_ctx, apiKey, DbService.Collection.patients);
-                    if (patient != null)
+                    bool success = DbService.UpdateStickyNote(_ctx, stickyId, stickyJson).GetAwaiter().GetResult();
+                    if (success)
                     {
-                        bool patientOwnsSticky = sticky.PatientId == patient.Id;
-                        if (patientOwnsSticky)
-                        {
-                            bool success = DbService.UpdateStickyNote(_ctx, stickyId, stickyJson).GetAwaiter().GetResult();
-                            if (success)
-                            {
-                                return Ok("Sticky note updated successfully.");
-                            }
-                            return BadRequest("Failed to update sticky notes.");
-                        }
-                        return Unauthorized("Patient does not own that sticky note.");
+                        return Ok("Sticky note updated successfully.");
                     }
-                    return NotFound("Patient does not exist.");
+                    return BadRequest("Failed to update sticky note.");
                 }
-                return NotFound("Sticky note does not exist.");
+                return Unauthorized("Patient does not own that sticky note.");
             }
             catch (Exception e)
             {
@@ -103,17 +94,18 @@ namespace iris_server.Controllers
         {
             try
             {
-                bool entryExists = DbService.GetEntityByPrimaryKey(_ctx, stickyId, DbService.Collection.stickies).GetAwaiter().GetResult() != null;
-                if (entryExists)
+                Patient patient = (Patient)DbService.GetEntityByForeignKey(_ctx, apiKey, DbService.Collection.patients);
+                bool patientOwnsSticky = patient.Stickies.Where(s => s.Id == stickyId).Count() == 1;
+                if (patientOwnsSticky)
                 {
                     bool success = DbService.DeleteEntityByPrimaryKey(_ctx, stickyId, DbService.Collection.stickies).GetAwaiter().GetResult();
                     if (success)
                     {
-                        return Ok("Sticky notedeleted successfully.");
+                        return Ok("Sticky note deleted successfully.");
                     }
                     return BadRequest("Failed to delete sticky note.");
                 }
-                return NotFound("Could not find a sticky note with that id.");
+                return Unauthorized("Patient does not own that sticky note.");
             }
             catch (Exception e)
             {

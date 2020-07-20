@@ -21,16 +21,16 @@ namespace iris_server
         public void ConfigureServices(IServiceCollection services)
         {
             // Development workaround to bypass CORS and test API on local servers/clients.
-            //services.AddCors(options =>
-            //{
-            //    options.AddPolicy(name: MyAllowSpecificOrigins,
-            //                      builder =>
-            //                      {
-            //                          builder.WithOrigins("http://localhost:4200");
-            //                      });
-            //});
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: MyAllowSpecificOrigins,
+                                  builder =>
+                                  {
+                                      builder.WithOrigins("http://localhost:4200");
+                                  });
+            });
 
-            //services.AddResponseCaching();
+            services.AddResponseCaching();
 
             // Initialise database context for dependency injection via BaseController.
             services.AddDbContext<Models.DbCtx>();
@@ -59,7 +59,7 @@ namespace iris_server
                 app.UseHsts();
             }
 
-            //app.UseCors(MyAllowSpecificOrigins);
+            app.UseCors(MyAllowSpecificOrigins);
             //app.UseHttpsRedirection();
             app.UseMvc();
         }

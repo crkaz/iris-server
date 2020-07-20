@@ -6,6 +6,8 @@ using iris_server.Services;
 using System;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 
 namespace iris_server.Controllers
 {
@@ -98,15 +100,22 @@ namespace iris_server.Controllers
         {
             try
             {
+                CalendarEntry entry = (CalendarEntry)DbService.GetEntityByPrimaryKey(_ctx, entryId, DbService.Collection.calendars).GetAwaiter().GetResult();
                 bool entryExists = DbService.GetEntityByPrimaryKey(_ctx, entryId, DbService.Collection.calendars).GetAwaiter().GetResult() != null;
                 if (entryExists)
                 {
-                    bool success = DbService.DeleteEntityByPrimaryKey(_ctx, entryId, DbService.Collection.calendars).GetAwaiter().GetResult();
-                    if (success)
+                    Carer carer = (Carer)DbService.GetEntityByForeignKey(_ctx, carerApiKey, DbService.Collection.carers);
+                    bool authorised = (carer.AssignedPatientIds != null && carer.AssignedPatientIds.Contains(entry.PatientId));
+                    if (authorised)
                     {
-                        return Ok("Calendar entry deleted successfully.");
+                        bool success = DbService.DeleteEntityByPrimaryKey(_ctx, entryId, DbService.Collection.calendars).GetAwaiter().GetResult();
+                        if (success)
+                        {
+                            return Ok("Calendar entry deleted successfully.");
+                        }
+                        return BadRequest("Failed to delete calendar entry.");
                     }
-                    return BadRequest("Failed to delete calendar entry.");
+                    return Unauthorized("You are not assigned to that patient.");
                 }
                 return NotFound("Could not find an entry with that id.");
             }

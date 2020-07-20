@@ -577,7 +577,7 @@ namespace iris_server.Services
                             break;
 
                         case "scale":
-                            float scale = (float)jsonDict[key];
+                            float scale = (float)(double)jsonDict[key];
                             sticky.Scale = scale;
                             changes = true;
                             break;
@@ -597,6 +597,13 @@ namespace iris_server.Services
                 Console.WriteLine(e);
             }
             return false;
+        }
+
+
+        // TODODOOOOO: REPLACE ABOVES
+        public static async Task<ICollection<T>> GetCollection<T>(DbCtx ctx, string patientId, Collection collection)
+        {
+            return (ICollection<T>)ctx.ActivityLogs;
         }
     }
 }

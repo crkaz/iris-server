@@ -64,7 +64,7 @@ namespace iris_server.Controllers
         }
 
 
-        #region Password reset endpoint: changed to use firebase library in frontend instead.
+        #region REMOVED: Password reset endpoint: changed to use firebase library in frontend instead.
         //// Send a password-reset email to the specified user.
         //// ..api/carer/reset?id=
         //[HttpGet]

@@ -247,6 +247,29 @@ namespace XUnitTests
             const string endpoint = "calendar/delete/?id=thisdoesntexist";
             const HttpStatusCode expectedStatusCode = HttpStatusCode.NotFound;
             const string expectedResponse = "Could not find an entry with that id.";
+            testClient.AddHeader("ApiKey", "testcarer");
+
+            // act
+            HttpResponseMessage response = await testClient.DeleteRequest(endpoint);
+            string actualResponse = await response.Content.ReadAsStringAsync();
+            HttpStatusCode actualStatusCode = response.StatusCode;
+
+            // assert
+            Assert.Equal(expectedStatusCode, actualStatusCode);
+            Assert.Equal(expectedResponse, actualResponse);
+        }
+
+
+
+        // Cannot delete a calendar entry of a patient that isn't assigned to the carer.
+        [Fact]
+        public async Task DeleteCalendarUnauthorised()
+        {
+            // arrange
+            TestClient testClient = new TestClient();
+            const string endpoint = "calendar/delete/?id=testpatient";
+            const HttpStatusCode expectedStatusCode = HttpStatusCode.Unauthorized;
+            const string expectedResponse = "You are not assigned to that patient.";
             testClient.AddHeader("ApiKey", "testcarer_nopatients");
 
             // act
