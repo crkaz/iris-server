@@ -44,7 +44,6 @@ namespace iris_server.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(nullable: false),
-                    PatientId = table.Column<string>(nullable: true),
                     What = table.Column<string>(nullable: true),
                     When = table.Column<DateTime>(nullable: false),
                     RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),

@@ -27,8 +27,6 @@ namespace XUnitTests
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-
-
         }
 
 
@@ -48,8 +46,6 @@ namespace XUnitTests
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-
-
         }
 
 
@@ -69,8 +65,6 @@ namespace XUnitTests
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-
-
         }
 
 
@@ -90,8 +84,6 @@ namespace XUnitTests
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-
-
         }
 
 
@@ -111,8 +103,6 @@ namespace XUnitTests
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-
-
         }
 
 
@@ -132,8 +122,6 @@ namespace XUnitTests
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
-
-
         }
     }
 }

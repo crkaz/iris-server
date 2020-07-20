@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using iris_server.Models;
 using XUnitTests.Utils;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace XUnitTests
 {
@@ -32,8 +31,6 @@ namespace XUnitTests
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedResponseBody, actualResponseBody);
-
-            
         }
 
 
@@ -61,8 +58,6 @@ namespace XUnitTests
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedResponseBody, actualResponseBody);
-
-            
         }
 
 
@@ -89,8 +84,6 @@ namespace XUnitTests
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedResponseBody, actualResponseBody);
-
-            
         }
 
 
@@ -117,8 +110,6 @@ namespace XUnitTests
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedResponseBody, actualResponseBody);
-
-            
         }
 
 
@@ -146,8 +137,6 @@ namespace XUnitTests
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal("testpatient", actualPatientConfig.Id);
             Assert.Equal(patientConfig.EnabledFeatures, actualPatientConfig.EnabledFeatures);
-
-            
         }
 
     }

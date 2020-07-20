@@ -2,10 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace iris_server.Filters
 {
@@ -28,11 +25,6 @@ namespace iris_server.Filters
                         {
                             // OK if the user claimed role is one of those specified in roles.
                             return;
-                        }
-                        else if (roles.Count() == 1 && roles[0] == "Admin")
-                        {
-                            // If the user claimed role is NOT in the specified in role and that role is ADMIN.
-                            unauthResponse = "Unauthorized. Admin access only.";
                         }
                     }
                     throw new UnauthorizedAccessException();
