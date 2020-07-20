@@ -15,12 +15,5 @@ namespace iris_server.Models
         public virtual ICollection<CalendarEntry> CalendarEntries { get; set; }
 
         public Carer() { }
-
-        // TODO: 
-        public bool SendPasswordReset()
-        {
-            // Use firebase api.
-            return false; // NOT IMPLEMENTED.
-        }
     }
 }

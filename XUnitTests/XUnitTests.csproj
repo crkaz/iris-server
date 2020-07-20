@@ -17,4 +17,8 @@
     <ProjectReference Include="..\iris-server.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ServiceTests\" />
+  </ItemGroup>
+
 </Project>

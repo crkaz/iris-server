@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace XUnitTests
 {
+
+    // Also validates authmiddleware.
     public class AuthFilterTests
     {
         [Fact]

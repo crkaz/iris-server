@@ -71,38 +71,38 @@ namespace iris_server.Controllers
         }
 
 
-        // Send a password-reset email to the specified user.
-        // ..api/carer/reset?id=
-        [HttpGet]
-        [Authorize(Roles = "admin")]
-        public IActionResult Reset([FromQuery(Name = "id")] string email)
-        {
-            try
-            {
-                Carer carer = (Carer)DbService.GetEntityByPrimaryKey(_ctx, email, DbService.Collection.carers).GetAwaiter().GetResult();
-                bool carerExists = carer != null;
-                if (carerExists)
-                {
-                    bool success = carer.SendPasswordReset();
-                    if (success)
-                    {
-                        return Ok("Password reset sent successfully");
-                    }
-                    else
-                    {
-                        return BadRequest("Failed to send password reset.");
-                    }
-                }
-                else
-                {
-                    return NotFound("Could not find a carer with that email.");
-                }
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e);
-            }
-        }
+        //// Send a password-reset email to the specified user.
+        //// ..api/carer/reset?id=
+        //[HttpGet]
+        //[Authorize(Roles = "admin")]
+        //public IActionResult Reset([FromQuery(Name = "id")] string email)
+        //{
+        //    try
+        //    {
+        //        Carer carer = (Carer)DbService.GetEntityByPrimaryKey(_ctx, email, DbService.Collection.carers).GetAwaiter().GetResult();
+        //        bool carerExists = carer != null;
+        //        if (carerExists)
+        //        {
+        //            bool success = carer.SendPasswordReset();
+        //            if (success)
+        //            {
+        //                return Ok("Password reset sent successfully");
+        //            }
+        //            else
+        //            {
+        //                return BadRequest("Failed to send password reset.");
+        //            }
+        //        }
+        //        else
+        //        {
+        //            return NotFound("Could not find a carer with that email.");
+        //        }
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        return BadRequest(e);
+        //    }
+        //}
 
 
         // Delete a user from the system, given their id.

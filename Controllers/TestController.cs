@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using iris_server.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Linq;
 
 namespace iris_server.Controllers
 {
@@ -18,7 +19,7 @@ namespace iris_server.Controllers
             return Ok("iris-server is online");
         }
 
-
+        // Used to test that endpoints with the patient role reject all other requests.
         [HttpGet]
         [Authorize(Roles = "patient")]
         public IActionResult AuthFilterPatient()
@@ -27,6 +28,7 @@ namespace iris_server.Controllers
         }
 
 
+        // Used to test that endpoints with the informalcarer role reject all other requests.
         [HttpGet]
         [Authorize(Roles = "informalcarer")]
         public IActionResult AuthFilterinFormalCarer()
@@ -35,6 +37,7 @@ namespace iris_server.Controllers
         }
 
 
+        // Used to test that endpoints with the formalcarer role reject all other requests.
         [HttpGet]
         [Authorize(Roles = "formalcarer")]
         public IActionResult AuthFilterFormalCarer()
@@ -43,6 +46,7 @@ namespace iris_server.Controllers
         }
 
 
+        // Used to test that endpoints with the admin role rejects all other requests.
         [HttpGet]
         [Authorize(Roles = "admin")]
         public IActionResult AuthFilterAdmin()
@@ -51,11 +55,21 @@ namespace iris_server.Controllers
         }
 
 
+        // Used to test that endpoints with the all/multiple roles reject all other (unknown) requests.
         [HttpGet]
         [Authorize(Roles = "admin,formalcarer,informalcarer,patient")]
         public IActionResult AuthFilterUnknown()
         {
             return Ok("All auths work");
+        }
+
+
+        // Used to test that logging middleware works by returning the number of dblogs.
+        [HttpGet]
+        [Authorize(Roles = "admin")]
+        public int NLogs()
+        {
+            return _ctx.DbLogs.Count();
         }
     }
 }

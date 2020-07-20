@@ -10,7 +10,7 @@ namespace iris_server.Filters
     {
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            string unauthResponse = "Unauthorized. Check ApiKey in Header is correct.";
+            string unauthResponse = "Unauthorized.";
 
             try
             {
@@ -18,12 +18,13 @@ namespace iris_server.Filters
 
                 if (authAttribute != null)
                 {
-                    string[] roles = authAttribute.Roles.Split(',');
+                    string[] roles = authAttribute.Roles.Split(','); // E.g. admin,patient,carer
+
                     foreach (string role in roles)
                     {
                         if (context.HttpContext.User.IsInRole(role))
                         {
-                            // OK if the user claimed role is one of those specified in roles.
+                            // OK if the user claimed role (authmiddleware) is one of those specified in roles.
                             return;
                         }
                     }
