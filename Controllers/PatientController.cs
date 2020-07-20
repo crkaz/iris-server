@@ -34,10 +34,7 @@ namespace iris_server.Controllers
                     }
                     return BadRequest();
                 }
-                else
-                {
-                    return Unauthorized("You are not assigned to this patient.");
-                }
+                return Unauthorized("You are not assigned to this patient.");
             }
             catch (Exception e)
             {
@@ -105,15 +102,9 @@ namespace iris_server.Controllers
                     {
                         return Ok(patient.Status);
                     }
-                    else
-                    {
-                        return BadRequest("Patient does not exist.");
-                    }
+                    return BadRequest("Patient does not exist.");
                 }
-                else
-                {
-                    return Unauthorized("You are not assigned to this patient.");
-                }
+                return Unauthorized("You are not assigned to this patient.");
             }
             catch (Exception e)
             {
@@ -140,15 +131,9 @@ namespace iris_server.Controllers
                         patient.Status = status;
                         return Ok(status);
                     }
-                    else
-                    {
-                        return BadRequest("Invalid status argument.");
-                    }
+                    return BadRequest("Invalid status argument.");
                 }
-                else
-                {
-                    return Unauthorized("Credentials do not match.");
-                }
+                return Unauthorized("Credentials do not match.");
             }
             catch (Exception e)
             {
@@ -172,12 +157,9 @@ namespace iris_server.Controllers
                     ICollection<ActivityLog> logs = DbService.GetLogs(_ctx, patientId, page, nItems).GetAwaiter().GetResult();
                     string logsJson = JsonConvert.SerializeObject(logs);
                     return Ok(logsJson);
+                    // Return logs as a paginated json collection
                 }
-                else
-                {
-                    return Unauthorized("You are not assigned to this patient.");
-                }
-                // Return logs as a paginated json collection
+                return Unauthorized("You are not assigned to this patient.");
             }
             catch (Exception e)
             {
@@ -199,10 +181,7 @@ namespace iris_server.Controllers
                 {
                     return Ok("Logged successfully.");
                 }
-                else
-                {
-                    return BadRequest("Logging failed.");
-                }
+                return BadRequest("Logging failed.");
             }
             catch (Exception e)
             {

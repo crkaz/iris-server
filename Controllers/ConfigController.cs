@@ -28,15 +28,9 @@ namespace iris_server.Controllers
                     {
                         return Ok("Updated patient successfully.");
                     }
-                    else
-                    {
-                        return BadRequest("Failed to update the patient.");
-                    }
+                    return BadRequest("Failed to update the patient.");
                 }
-                else
-                {
-                    return Unauthorized("You are not assigned to this patient.");
-                }
+                return Unauthorized("You are not assigned to this patient.");
             }
             catch (Exception e)
             {
@@ -58,10 +52,7 @@ namespace iris_server.Controllers
                     Patient patient = (Patient)DbService.GetEntityByPrimaryKey(_ctx, id, DbService.Collection.patients).GetAwaiter().GetResult();
                     return Ok(patient.Config);
                 }
-                else
-                {
-                    return Unauthorized("You are not assigned to this patient.");
-                }
+                return Unauthorized("You are not assigned to this patient.");
             }
             catch (Exception e)
             {

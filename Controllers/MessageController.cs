@@ -30,15 +30,9 @@ namespace iris_server.Controllers
                     {
                         return Ok("Message sent successfully.");
                     }
-                    else
-                    {
-                        return BadRequest("Failed to send message.");
-                    }
+                    return BadRequest("Failed to send message.");
                 }
-                else
-                {
-                    return Unauthorized("You are not assigned to this patient.");
-                }
+                return Unauthorized("You are not assigned to this patient.");
             }
             catch (Exception e)
             {

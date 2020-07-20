@@ -38,20 +38,11 @@ namespace iris_server.Controllers
                         {
                             return Ok("Successfully added calendar entry.");
                         }
-                        else
-                        {
-                            return BadRequest("Failed to add calendar entry.");
-                        }
+                        return BadRequest("Failed to add calendar entry.");
                     }
-                    else
-                    {
-                        return Unauthorized("You are not assigned to this patient.");
-                    }
+                    return Unauthorized("You are not assigned to this patient.");
                 }
-                else
-                {
-                    return BadRequest("Invalid start date.");
-                }
+                return BadRequest("Invalid start date.");
             }
             catch (Exception e)
             {
@@ -85,26 +76,13 @@ namespace iris_server.Controllers
                             {
                                 return Ok("Calendar entry updated successfully.");
                             }
-                            else
-                            {
-                                return BadRequest("Failed to update calendar entry.");
-                            }
+                            return BadRequest("Failed to update calendar entry.");
                         }
-                        else
-                        {
-                            return BadRequest("Invalid start date.");
-                        }
-
+                        return BadRequest("Invalid start date.");
                     }
-                    else
-                    {
-                        return Unauthorized("You are not assigned to this patient.");
-                    }
+                    return Unauthorized("You are not assigned to this patient.");
                 }
-                else
-                {
-                    return NotFound("Could not find an entry with that id.");
-                }
+                return NotFound("Could not find an entry with that id.");
             }
             catch (Exception e)
             {
@@ -128,15 +106,9 @@ namespace iris_server.Controllers
                     {
                         return Ok("Calendar entry deleted successfully.");
                     }
-                    else
-                    {
-                        return BadRequest("Failed to delete calendar entry.");
-                    }
+                    return BadRequest("Failed to delete calendar entry.");
                 }
-                else
-                {
-                    return NotFound("Could not find an entry with that id.");
-                }
+                return NotFound("Could not find an entry with that id.");
             }
             catch (Exception e)
             {
@@ -159,12 +131,9 @@ namespace iris_server.Controllers
                     ICollection<CalendarEntry> entries = DbService.GetCalendarEntries(_ctx, patientId, page, nItems).GetAwaiter().GetResult();
                     string entriesJson = JsonConvert.SerializeObject(entries);
                     return Ok(entriesJson);
+                    // Return logs as a paginated json collection
                 }
-                else
-                {
-                    return Unauthorized("You are not assigned to this patient.");
-                }
-                // Return logs as a paginated json collection
+                return Unauthorized("You are not assigned to this patient.");
             }
             catch (Exception e)
             {

@@ -49,15 +49,9 @@ namespace iris_server.Controllers
                     {
                         return Ok("Successfully added sticky.");
                     }
-                    else
-                    {
-                        return BadRequest("Failed to add sticky.");
-                    }
+                    return BadRequest("Failed to add sticky.");
                 }
-                else
-                {
-                    return Unauthorized("Invalid api key.");
-                }
+                return Unauthorized("Invalid api key.");
             }
             catch (Exception e)
             {
@@ -87,25 +81,13 @@ namespace iris_server.Controllers
                             {
                                 return Ok("Sticky note updated successfully.");
                             }
-                            else
-                            {
-                                return BadRequest("Failed to update sticky notes.");
-                            }
+                            return BadRequest("Failed to update sticky notes.");
                         }
-                        else
-                        {
-                            return Unauthorized("Patient does not own that sticky note.");
-                        }
+                        return Unauthorized("Patient does not own that sticky note.");
                     }
-                    else
-                    {
-                        return NotFound("Patient does not exist.");
-                    }
+                    return NotFound("Patient does not exist.");
                 }
-                else
-                {
-                    return NotFound("Sticky note does not exist.");
-                }
+                return NotFound("Sticky note does not exist.");
             }
             catch (Exception e)
             {
@@ -129,15 +111,9 @@ namespace iris_server.Controllers
                     {
                         return Ok("Sticky notedeleted successfully.");
                     }
-                    else
-                    {
-                        return BadRequest("Failed to delete sticky note.");
-                    }
+                    return BadRequest("Failed to delete sticky note.");
                 }
-                else
-                {
-                    return NotFound("Could not find a sticky note with that id.");
-                }
+                return NotFound("Could not find a sticky note with that id.");
             }
             catch (Exception e)
             {

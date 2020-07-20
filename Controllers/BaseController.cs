@@ -2,8 +2,8 @@
 using iris_server.Models;
 
 /// <summary>
-/// Base controller manages route format for all controllers and enforces
-/// dependency injection to inject the user context into all requests.
+/// Base controller manages route format for all controllers and uses
+/// dependency injection to inject the context into all controllers.
 /// </summary>
 namespace iris_server.Controllers
 {
@@ -11,6 +11,7 @@ namespace iris_server.Controllers
     [ApiController]
     public abstract class BaseController : ControllerBase
     {
+        protected readonly DbCtx _ctx; // Controller dependency. Declared in abstract class for injection.
         protected struct _roles
         {
             public const string all = "admin,informalcarer,formalcarer,patient";
@@ -18,7 +19,7 @@ namespace iris_server.Controllers
             public const string admin = "admin";
             public const string patient = "patient";
         };
-        protected readonly DbCtx _ctx;
+
 
         public BaseController(DbCtx context)
         {
