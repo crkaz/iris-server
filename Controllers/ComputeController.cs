@@ -2,6 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using iris_server.Models;
 using Newtonsoft.Json.Linq;
+using iris_server.Services;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace iris_server.Controllers
 {
@@ -12,9 +15,9 @@ namespace iris_server.Controllers
 
         // Analyse an image and return the predicted room and context aware prompt.
         // ..api/compute/detectroom
-        [HttpGet]
+        [HttpPost]
         // [Authorize(Roles = "Patient")]
-        public IActionResult DetectRoom([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
+        public IActionResult DetectRoom([FromHeader(Name = "ApiKey")] string apiKey)
         {
             try
             {
@@ -29,9 +32,9 @@ namespace iris_server.Controllers
 
         // Analyse an image and return annotations.
         // ..api/compute/detectconfusion
-        [HttpGet]
+        [HttpPost]
         // [Authorize(Roles = "Patient")]
-        public IActionResult DetectConfusion([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id)
+        public IActionResult DetectConfusion([FromHeader(Name = "ApiKey")] string apiKey)
         {
             try
             {
@@ -49,23 +52,12 @@ namespace iris_server.Controllers
 
         // Analyse an array of collection of transforms and return whether or not a fall occurred..
         // ..api/compute/detectfall
-        [HttpGet]
-        // [Authorize(Roles = "Patient")]
-        public IActionResult DetectFall([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string id, [FromBody] JObject transforms)
+        [HttpPost]
+        [Authorize(Roles = _roles.patient)]
+        public bool DetectFall([FromHeader(Name = "ApiKey")] string apiKey, [FromBody] JObject transforms)
         {
-            //return DetectionService.DetectFall(transforms);
-
-            try
-            {
-                //byte[] imageBytes = await Request.GetRawBodyBytesAsync();
-                //// Get azure labels
-                //// Pass to detection service
-                return Ok();
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e);
-            }
+            bool result = DetectionService.DetectFall(transforms, null);
+            return result;
         }
     }
 }

@@ -113,7 +113,6 @@ namespace iris_server.Services
             return false;
         }
 
-        // TODO: Implement visitor pattern.
         /// TODO: MOVE
         public static bool PatientIsAssigned(DbCtx ctx, string carerId, string patientId)
         {
@@ -176,6 +175,7 @@ namespace iris_server.Services
                 return false;
             }
         }
+
 
         /// TODO: IMPLEMENT
         public static async Task<bool> UpdatePatientConfig(DbCtx ctx, string patientId, JObject configJson)
@@ -558,6 +558,7 @@ namespace iris_server.Services
         }
 
 
+        /// TODO: MOVE
         public static async Task<bool> UpdateStickyNote(DbCtx ctx, string stickyId, JObject stickyJson)
         {
             try
@@ -597,13 +598,6 @@ namespace iris_server.Services
                 Console.WriteLine(e);
             }
             return false;
-        }
-
-
-        // TODODOOOOO: REPLACE ABOVES
-        public static async Task<ICollection<T>> GetCollection<T>(DbCtx ctx, string patientId, Collection collection)
-        {
-            return (ICollection<T>)ctx.ActivityLogs;
         }
     }
 }
