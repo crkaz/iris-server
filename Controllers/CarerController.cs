@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using iris_server.Services;
 using Newtonsoft.Json.Linq;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace iris_server.Controllers
 {
@@ -194,5 +195,30 @@ namespace iris_server.Controllers
                 return BadRequest(e);
             }
         }
+
+
+        // Return the collection of patients assigned to this user in the system.
+        // ..api/carer/patients
+        [HttpGet]
+        [Authorize(Roles = _roles.carer)]
+        public IActionResult Patients([FromHeader(Name = "ApiKey")] string carerApiKey)
+        {
+            try
+            {
+                Dictionary<string, object> patients = DbService.GetAssignedPatients(_ctx, carerApiKey).GetAwaiter().GetResult();
+                string response = "This carer does not have any patients assigned.";
+                if (patients != null && patients.Count > 0)
+                {
+                    response = JsonConvert.SerializeObject(patients);
+                    return Ok(response);
+                }
+                return NotFound(response);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
+
     }
 }

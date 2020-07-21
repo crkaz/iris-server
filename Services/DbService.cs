@@ -2,6 +2,7 @@
 using iris_server.Models.Interfaces;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -598,6 +599,29 @@ namespace iris_server.Services
                 Console.WriteLine(e);
             }
             return false;
+        }
+
+
+        public static async Task<Dictionary<string, object>> GetAssignedPatients(DbCtx ctx, string carerApiKey)
+        {
+            try
+            {
+                Carer carer = (Carer)await GetEntityByPrimaryKey(ctx, carerApiKey, Collection.carers);
+                Dictionary<string, object> patients = new Dictionary<string, object>();
+                foreach (string patientId in carer.AssignedPatientIds)
+                {
+                    Patient p = (Patient)await GetEntityByPrimaryKey(ctx, patientId, Collection.patients);
+                    ActivityLog lastLog = p.ActivityLogs.First();
+                    patients.Add(p.Id,
+                        new Dictionary<string, object>() { { "id", p.Id }, { "activity", p.ActivityLogs.First() } });
+                }
+                return patients;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            return null;
         }
     }
 }
