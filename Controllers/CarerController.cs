@@ -205,7 +205,7 @@ namespace iris_server.Controllers
         {
             try
             {
-                Dictionary<string, object> patients = DbService.GetAssignedPatients(_ctx, carerApiKey).GetAwaiter().GetResult();
+                IList<object> patients = DbService.GetAssignedPatients(_ctx, carerApiKey).GetAwaiter().GetResult();
                 string response = "This carer does not have any patients assigned.";
                 if (patients != null && patients.Count > 0)
                 {

@@ -602,18 +602,25 @@ namespace iris_server.Services
         }
 
 
-        public static async Task<Dictionary<string, object>> GetAssignedPatients(DbCtx ctx, string carerApiKey)
+        public static async Task<List<object>> GetAssignedPatients(DbCtx ctx, string carerApiKey)
         {
             try
             {
                 Carer carer = (Carer)await GetEntityByPrimaryKey(ctx, carerApiKey, Collection.carers);
-                Dictionary<string, object> patients = new Dictionary<string, object>();
+                List<object> patients = new List<object>();
                 foreach (string patientId in carer.AssignedPatientIds)
                 {
                     Patient p = (Patient)await GetEntityByPrimaryKey(ctx, patientId, Collection.patients);
-                    ActivityLog lastLog = p.ActivityLogs.First();
-                    patients.Add(p.Id,
-                        new Dictionary<string, object>() { { "id", p.Id }, { "activity", p.ActivityLogs.First() } });
+                    bool logsExist = p.ActivityLogs.Count > 0;
+                    if (logsExist)
+                    {
+                        ActivityLog lastLog = p.ActivityLogs.OrderBy(l => l.DateTime).Last();
+                        patients.Add(new Dictionary<string, object>() { { "id", p.Id }, { "activity", lastLog.Caption }, { "when", lastLog.DateTime }, { "where", lastLog.Location }, { "status", p.Status } });
+                    }
+                    else
+                    {
+                        patients.Add(new Dictionary<string, object>() { { "id", p.Id }, { "activity", "" }, { "when", "" }, { "where", "" }, { "status", p.Status } });
+                    }
                 }
                 return patients;
             }
