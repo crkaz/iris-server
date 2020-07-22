@@ -42,7 +42,7 @@ namespace XUnitTests
 
             // act
             HttpResponseMessage response = await testClient.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
+            //string responseContentJson = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert
@@ -61,7 +61,7 @@ namespace XUnitTests
 
             // act
             HttpResponseMessage response = await testClient.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
+            //string responseContentJson = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert
@@ -80,7 +80,7 @@ namespace XUnitTests
 
             // act
             HttpResponseMessage response = await testClient.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
+            //string responseContentJson = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert
@@ -99,7 +99,7 @@ namespace XUnitTests
 
             // act
             HttpResponseMessage response = await testClient.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
+            //string responseContentJson = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert
@@ -118,7 +118,7 @@ namespace XUnitTests
 
             // act
             HttpResponseMessage response = await testClient.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
+            //string responseContentJson = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert

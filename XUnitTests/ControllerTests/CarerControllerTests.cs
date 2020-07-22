@@ -374,11 +374,10 @@ namespace XUnitTests
             TestClient testClient = new TestClient();
             const string endpoint = "carer/patients";
             const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
-            testClient.AddHeader("ApiKey", "testcarer1");
+            testClient.AddHeader("ApiKey", "testcarer");
 
             // act
             HttpResponseMessage response = await testClient.GetRequest(endpoint);
-            string actualResponse = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert

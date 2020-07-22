@@ -24,17 +24,12 @@ namespace iris_server.Controllers
         {
             try
             {
-                bool patientAssignedToThisCarer = DbService.PatientIsAssigned(_ctx, carerApiKey, patientId);
-                if (patientAssignedToThisCarer)
+                bool success = DbService.DeleteEntityByPrimaryKey(_ctx, patientId, DbService.Collection.patients).GetAwaiter().GetResult();
+                if (success)
                 {
-                    bool success = DbService.DeleteEntityByPrimaryKey(_ctx, patientId, DbService.Collection.patients).GetAwaiter().GetResult();
-                    if (success)
-                    {
-                        return Ok();
-                    }
-                    return BadRequest();
+                    return Ok();
                 }
-                return Unauthorized("You are not assigned to this patient.");
+                return BadRequest();
             }
             catch (Exception e)
             {
