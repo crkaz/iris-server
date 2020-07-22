@@ -7,6 +7,7 @@ using XUnitTests.Utils;
 using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace XUnitTests
 {
@@ -357,6 +358,46 @@ namespace XUnitTests
 
             // act
             HttpResponseMessage response = await testClient.PutRequest(endpoint, body: requestBody);
+            string actualResponse = await response.Content.ReadAsStringAsync();
+            HttpStatusCode actualStatusCode = response.StatusCode;
+
+            // assert
+            Assert.Equal(expectedStatusCode, actualStatusCode);
+            Assert.Equal(expectedResponse, actualResponse);
+        }
+
+
+        [Fact]
+        public async Task GetPatientsOkRequest()
+        {
+            // arrange
+            TestClient testClient = new TestClient();
+            const string endpoint = "carer/patients";
+            const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
+            testClient.AddHeader("ApiKey", "testcarer1");
+
+            // act
+            HttpResponseMessage response = await testClient.GetRequest(endpoint);
+            string actualResponse = await response.Content.ReadAsStringAsync();
+            HttpStatusCode actualStatusCode = response.StatusCode;
+
+            // assert
+            Assert.Equal(expectedStatusCode, actualStatusCode);
+        }
+
+
+        [Fact]
+        public async Task GetPatientsNotFound()
+        {
+            // arrange
+            TestClient testClient = new TestClient();
+            const string endpoint = "carer/patients";
+            const HttpStatusCode expectedStatusCode = HttpStatusCode.NotFound;
+            const string expectedResponse = "This carer does not have any patients assigned.";
+            testClient.AddHeader("ApiKey", "testcarer_nopatients");
+
+            // act
+            HttpResponseMessage response = await testClient.GetRequest(endpoint);
             string actualResponse = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 

@@ -31,7 +31,8 @@ namespace iris_server
                                   builder =>
                                   {
                                       builder.WithOrigins("http://localhost:4200")
-                                      .AllowAnyHeader();
+                                      .AllowAnyHeader()
+                                      .AllowAnyMethod();
                                   });
             });
 

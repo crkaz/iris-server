@@ -365,7 +365,7 @@ namespace XUnitTests
         {
             // arrange
             TestClient testClient = new TestClient();
-            const string endpoint = "patient/logs/?id=testpatient2&page=1&nitems=5";
+            const string endpoint = "patient/logs/?id=testpatient5&page=1&nitems=5";
             const int expectedNLogs = 0;
             const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
             testClient.AddHeader("ApiKey", "testcarer");
