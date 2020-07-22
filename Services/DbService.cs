@@ -241,7 +241,7 @@ namespace iris_server.Services
                     Patient patient = (Patient)await GetEntityByPrimaryKey(ctx, patientId, Collection.patients);
                     if (patient != null)
                     {
-                        PatientMessage messageObj = new PatientMessage() { Read = null, Sent = DateTime.Now, Title = title, Message = message };
+                        PatientMessage messageObj = new PatientMessage() { Read = null, Sent = DateTime.Now, Title = title, Message = message, CarerId = carer.Email };
                         patient.Messages.Add(messageObj);
                         await ctx.SaveChangesAsync();
                         return true;
@@ -266,7 +266,7 @@ namespace iris_server.Services
                 string caption = (string)jsonDict["Caption"];
                 string description = (string)jsonDict["JsonDescription"];
                 string location = (string)jsonDict["Location"];
-                ActivityLog log = new ActivityLog() { Caption = caption, JsonDescription = description, Location = location };
+                ActivityLog log = new ActivityLog() { Caption = caption, JsonDescription = description, Location = location, DateTime = DateTime.Now };
                 Patient patient = (Patient)GetEntityByForeignKey(ctx, patientApiKey, Collection.patients);
 
                 patient.ActivityLogs.Add(log);
@@ -396,16 +396,24 @@ namespace iris_server.Services
         {
             try
             {
-                int page = Math.Abs(int.Parse(pageStr));
-                int nItems = Math.Abs(int.Parse(nItemsStr));
-                int startIndex = (page - 1) * nItems;
+                int page;
+                int nItems;
+                int startIndex;
                 var worker = await ctx.Patients.FindAsync(patientId);
                 // Get only entries from todays date onwards.
                 ICollection<CalendarEntry> entries = worker.CalendarEntries.Where(entry => entry.Start > DateTime.Now).ToList();
-                nItems = nItems - ((page * nItems) - entries.Count);
-                List<CalendarEntry> entriesList = entries.ToList();
-                // Return paginated collection.
-                return entriesList.GetRange(startIndex, nItems);
+                if (pageStr != "all") // Paginate
+                {
+                    page = Math.Abs(int.Parse(pageStr));
+                    nItems = Math.Abs(int.Parse(nItemsStr));
+                    startIndex = (page - 1) * nItems;
+                    nItems = nItems - ((page * nItems) - entries.Count);
+                    List<CalendarEntry> entriesList = entries.ToList();
+                    // Return paginated collection.
+                    return entriesList.GetRange(startIndex, nItems);
+                }
+                // Return whole collection.
+                return entries;
             }
             catch (Exception e)
             {
@@ -420,15 +428,23 @@ namespace iris_server.Services
         {
             try
             {
-                int page = Math.Abs(int.Parse(pageStr));
-                int nItems = Math.Abs(int.Parse(nItemsStr));
-                int startIndex = (page - 1) * nItems;
+                int page;
+                int nItems;
+                int startIndex;
                 var worker = await ctx.Patients.FindAsync(patientId);
                 ICollection<ActivityLog> logs = worker.ActivityLogs;
-                nItems = nItems - ((page * nItems) - logs.Count);
-                List<ActivityLog> logsList = logs.ToList();
-                // Return paginated collection.
-                return logsList.GetRange(startIndex, nItems);
+                if (pageStr != "all") // Paginate
+                {
+                    page = Math.Abs(int.Parse(pageStr));
+                    nItems = Math.Abs(int.Parse(nItemsStr));
+                    startIndex = (page - 1) * nItems;
+                    nItems = nItems - ((page * nItems) - logs.Count);
+                    List<ActivityLog> entriesList = logs.ToList();
+                    // Return paginated collection.
+                    return entriesList.GetRange(startIndex, nItems);
+                }
+                // Return whole collection.
+                return logs;
             }
             catch (Exception e)
             {

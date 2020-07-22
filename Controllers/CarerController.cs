@@ -15,7 +15,6 @@ namespace iris_server.Controllers
         /// Constructor injects the user context using dependency injection, via the BaseController. 
         public CarerController(DbCtx context) : base(context) { }
 
-
         // Create a new user in the system.
         // ..api/carer/post
         [Authorize(Roles = _roles.admin)]
