@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace iris_server.Models
 {
@@ -36,9 +37,9 @@ namespace iris_server.Models
             #region Converters
             // Cannot store complex types in database. These converters managage the conversion to and from.
 
-            var stringArrayConverter = new ValueConverter<IList<string>, string>(
+            var stringArrayConverter = new ValueConverter<List<string>, string>(
                 v => v.ToString(),
-                v => v.Split(',', StringSplitOptions.None));
+                v => v.Split(',', StringSplitOptions.None).ToList());
 
             ValueConverter featuresConverter = new ValueConverter<IList<IFeature>, string>(
                  v => JsonConvert.SerializeObject(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }),

@@ -11,7 +11,7 @@ namespace iris_server.Models
         public string Email { get; set; } // Primary Key
         [Required]
         public virtual User User { get; set; } // Foreign Key.
-        public IList<string> AssignedPatientIds { get; set; }
+        public virtual List<string> AssignedPatientIds { get; set; }
         public virtual ICollection<CalendarEntry> CalendarEntries { get; set; }
 
         public Carer() { }

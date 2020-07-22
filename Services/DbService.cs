@@ -320,7 +320,7 @@ namespace iris_server.Services
                 DateTime end = (DateTime)jsonDict["End"];
                 int repetition = (int)(long)jsonDict["Repeat"];
                 string description = (string)jsonDict["Description"];
-                IList<string> reminders = (IList<string>)jsonDict["Reminders"];
+                List<string> reminders = (List<string>)jsonDict["Reminders"];
                 Patient patient = (Patient)await GetEntityByPrimaryKey(ctx, patientId, Collection.patients);
                 CalendarEntry entry = new CalendarEntry() { Description = description, End = end, Start = start, Repeat = (CalendarEntry.Repetition)repetition, Reminders = reminders };
                 patient.CalendarEntries.Add(entry);
@@ -368,7 +368,7 @@ namespace iris_server.Services
                             changes = true;
                             break;
                         case "reminders":
-                            IList<string> reminders = (IList<string>)jsonDict["Reminders"];
+                            List<string> reminders = (List<string>)jsonDict["Reminders"];
                             entry.Reminders = reminders;
                             changes = true;
                             break;
@@ -516,7 +516,7 @@ namespace iris_server.Services
                     if (patientAlreadyAssigned)
                     {
                         if (patientId != "testpatient") // Don't remove test record.
-                            carer.AssignedPatientIds.ToList().Remove(patientId);
+                            carer.AssignedPatientIds.Remove(patientId);
                         await ctx.SaveChangesAsync();
                     }
                 }

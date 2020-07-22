@@ -21,7 +21,7 @@ namespace iris_server.Models
         public DateTime End { get; set; }
         public Repetition Repeat { get; set; }
         public string Description { get; set; }
-        public IList<string> Reminders { get; set; }
+        public virtual List<string> Reminders { get; set; }
 
         [Timestamp] // Enable optimistic concurrency measures by timestamping transactions (EF convention).
         public byte[] RowVersion { get; set; }
