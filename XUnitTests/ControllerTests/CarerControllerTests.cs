@@ -405,5 +405,27 @@ namespace XUnitTests
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.Equal(expectedResponse, actualResponse);
         }
+
+        // Informal carers may only have 1 assigned patient.
+        [Fact]
+        public async Task AllocateBadRequest_Informal()
+        {
+            // arrange
+            TestClient testClient = new TestClient();
+            const string endpoint = "carer/allocate/?id=testpatient";
+            string requestBody = JsonConvert.SerializeObject(new Dictionary<string, object>() { { "patient", "testpatient" }, { "carer", "testcarer_informal2" }, { "assign", true } });
+            const HttpStatusCode expectedStatusCode = HttpStatusCode.BadRequest;
+            const string expectedResponse = "Informal carers may only have a single assigned patient.";
+            testClient.AddHeader("ApiKey", "testcarer");
+
+            // act
+            HttpResponseMessage response = await testClient.PutRequest(endpoint, body: requestBody);
+            string actualResponse = await response.Content.ReadAsStringAsync();
+            HttpStatusCode actualStatusCode = response.StatusCode;
+
+            // assert
+            Assert.Equal(expectedStatusCode, actualStatusCode);
+            Assert.Equal(expectedResponse, actualResponse);
+        }
     }
 }

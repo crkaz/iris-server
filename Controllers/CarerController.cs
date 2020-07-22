@@ -148,14 +148,20 @@ namespace iris_server.Controllers
 
                 if (carer != null && patient != null)
                 {
-                    bool success = DbService.AllocatePatient(_ctx, patientAndCarerId).GetAwaiter().GetResult();
-                    if (success)
+                    bool canAssign = (carer.User.Role != "informalcarer" || carer.AssignedPatientIds.Count == 0);
+                    if (canAssign)
                     {
-                        if (assign)
-                            return Ok("Assigned successfully.");
-                        return Ok("Unassigned successfully.");
+                        bool success = DbService.AllocatePatient(_ctx, patientAndCarerId).GetAwaiter().GetResult();
+                        if (success)
+                        {
+                            if (assign)
+                                return Ok("Assigned successfully.");
+                            return Ok("Unassigned successfully.");
+                        }
+                        return BadRequest("Failed.");
+
                     }
-                    return BadRequest("Failed.");
+                    return BadRequest("Informal carers may only have a single assigned patient.");
                 }
                 return NotFound("Either the patient or carer does not exist.");
             }
