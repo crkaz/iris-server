@@ -110,25 +110,22 @@ namespace iris_server.Controllers
 
         // Update the status of the patient (e.g. online, offline, alert).
         /// ..api/patient/status?id=&=status
-        [HttpPut]
+        [HttpGet]
         [Authorize(Roles = _roles.patient)]
-        public IActionResult Status([FromHeader(Name = "ApiKey")] string patientApiKey, [FromQuery(Name = "id")] string patientId, [FromQuery(Name = "status")] string status)
+        public IActionResult UpdateStatus([FromHeader(Name = "ApiKey")] string patientApiKey, [FromQuery(Name = "status")] string status)
         {
             try
             {
                 Patient patient = (Patient)DbService.GetEntityByForeignKey(_ctx, patientApiKey, DbService.Collection.patients);
-                if (patient.Id == patientId)
+                string[] enumNames = Enum.GetNames(typeof(Patient.PatientStatus));
+                bool validStatus = enumNames.Contains(status);
+                if (validStatus)
                 {
-                    string[] enumNames = Enum.GetNames(typeof(Patient.PatientStatus));
-                    bool validStatus = enumNames.Contains(status);
-                    if (validStatus)
-                    {
-                        patient.Status = status;
-                        return Ok(status);
-                    }
-                    return BadRequest("Invalid status argument.");
+                    patient.Status = status;
+                    _ctx.SaveChanges();
+                    return Ok(status);
                 }
-                return Unauthorized("Credentials do not match.");
+                return BadRequest("Invalid status argument.");
             }
             catch (Exception e)
             {

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using iris_server.Models;
 using Newtonsoft.Json.Linq;
 using iris_server.Services;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 
 namespace iris_server.Controllers

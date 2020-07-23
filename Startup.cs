@@ -3,10 +3,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Net.WebSockets;
-using System.Threading;
-using System.Threading.Tasks;
-using System;
 
 namespace iris_server
 {

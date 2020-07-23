@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ServiceTests\**" />
+    <EmbeddedResource Remove="ServiceTests\**" />
+    <None Remove="ServiceTests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
@@ -15,10 +21,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\iris-server.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="ServiceTests\" />
   </ItemGroup>
 
 </Project>

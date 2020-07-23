@@ -6,7 +6,6 @@ using iris_server.Models;
 using XUnitTests.Utils;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace XUnitTests
 {
@@ -203,20 +202,20 @@ namespace XUnitTests
 
 
         /// <summary>
-        /// Test response for a request to PUT the status of an existing patient.
+        /// Test response for a request to update the status of an existing patient. Because no data is passed, this is a get request.
         /// </summary>
         [Fact]
-        public async Task PutPatientStatusOkRequest()
+        public async Task UpdatePatientStatusOkRequest()
         {
             // arrange
             TestClient testClient = new TestClient();
-            const string endpoint = "patient/status/?id=testpatient&status=offline";
+            const string endpoint = "patient/updatestatus/?status=offline";
             string expectedPatientStatus = Patient.PatientStatus.offline.ToString();
             const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
             testClient.AddHeader("ApiKey", "testpatient");
 
             // act
-            HttpResponseMessage response = await testClient.PutRequest(endpoint);
+            HttpResponseMessage response = await testClient.GetRequest(endpoint);
             string actualPatientStatus = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 
@@ -227,43 +226,20 @@ namespace XUnitTests
 
 
         /// <summary>
-        /// Test response for a request to PUT the status of a patient to an unrecognised status value.
+        /// Test response for a request to update the status of a patient to an unrecognised status value.
         /// </summary>
         [Fact]
-        public async Task PutPatientStatusBadRequest_InvalidStatus()
+        public async Task UpdatePatientStatusBadRequest_InvalidStatus()
         {
             // arrange
             TestClient testClient = new TestClient();
-            const string endpoint = "patient/status/?id=testpatient&status=AnInvalidStatus";
+            const string endpoint = "patient/updatestatus/?status=AnInvalidStatus";
             const HttpStatusCode expectedStatusCode = HttpStatusCode.BadRequest;
             const string expectedResponseBody = "Invalid status argument.";
             testClient.AddHeader("ApiKey", "testpatient");
 
             // act
-            HttpResponseMessage response = await testClient.PutRequest(endpoint);
-            HttpStatusCode actualStatusCode = response.StatusCode;
-            string actualResponseBody = await response.Content.ReadAsStringAsync();
-
-            // assert
-            Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedResponseBody, actualResponseBody);
-        }
-
-        /// <summary>
-        /// Test response for a request to PUT the status of a patient not from a different patient.
-        /// </summary>
-        [Fact]
-        public async Task PutPatientStatusUnauthorised()
-        {
-            // arrange
-            TestClient testClient = new TestClient();
-            const string endpoint = "patient/status/?id=testpatient&status=offline";
-            const HttpStatusCode expectedStatusCode = HttpStatusCode.Unauthorized;
-            testClient.AddHeader("ApiKey", "testpatient2");
-            const string expectedResponseBody = "Credentials do not match.";
-
-            // act
-            HttpResponseMessage response = await testClient.PutRequest(endpoint);
+            HttpResponseMessage response = await testClient.GetRequest(endpoint);
             HttpStatusCode actualStatusCode = response.StatusCode;
             string actualResponseBody = await response.Content.ReadAsStringAsync();
 
