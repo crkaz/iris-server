@@ -18,7 +18,7 @@ namespace iris_server.Controllers
         // Add a new calender entry to the patient's calendar.
         // ..api/patient/calendar?id=
         [Authorize(Roles = _roles.carer)]
-        public IActionResult Post([FromHeader(Name = "ApiKey")] string carerApiKey, [FromQuery(Name = "id")] string entryId, [FromBody] JObject calendarJson)
+        public IActionResult Post([FromHeader(Name = "ApiKey")] string carerApiKey, [FromQuery(Name = "id")] string patientId, [FromBody] JObject calendarJson)
         {
             try
             {
@@ -29,11 +29,10 @@ namespace iris_server.Controllers
                 bool validEntry = (start != null && end != null) && (start > DateTime.Now.AddMinutes(5)) && (start <= end);
                 if (validEntry)
                 {
-                    CalendarEntry entry = (CalendarEntry)DbService.GetEntityByPrimaryKey(_ctx, entryId, DbService.Collection.calendars).GetAwaiter().GetResult();
-                    bool patientAssignedToThisCarer = DbService.PatientIsAssigned(_ctx, carerApiKey, entry.PatientId);
+                    bool patientAssignedToThisCarer = DbService.PatientIsAssigned(_ctx, carerApiKey, patientId);
                     if (patientAssignedToThisCarer)
                     {
-                        bool success = DbService.AddCalendarEntry(_ctx, entry.PatientId, entryId, jsonDict).GetAwaiter().GetResult();
+                        bool success = DbService.AddCalendarEntry(_ctx, patientId, jsonDict).GetAwaiter().GetResult();
                         if (success)
                         {
                             return Ok("Successfully added calendar entry.");

@@ -312,7 +312,7 @@ namespace iris_server.Services
         }
 
         /// TODO: MOVE
-        public static async Task<bool> AddCalendarEntry(DbCtx ctx, string patientId, string entryId, Dictionary<string, object> jsonDict)
+        public static async Task<bool> AddCalendarEntry(DbCtx ctx, string patientId, Dictionary<string, object> jsonDict)
         {
             try
             {
