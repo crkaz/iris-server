@@ -23,9 +23,12 @@ namespace iris_server.Controllers
             try
             {
                 var jsonDict = JObject.FromObject(calendarJson).ToObject<Dictionary<string, object>>();
-                DateTime start = (DateTime)jsonDict["Start"];
-                DateTime end = (DateTime)jsonDict["End"];
-
+                DateTime start = DateTime.Parse((string)jsonDict["Start"]);
+                DateTime end;
+                bool endProvided = DateTime.TryParse((string)jsonDict["End"], out end);
+                if (!endProvided)
+                    end = start;
+                
                 bool validEntry = (start != null && end != null) && (start > DateTime.Now.AddMinutes(5)) && (start <= end);
                 if (validEntry)
                 {

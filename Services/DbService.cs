@@ -1,5 +1,6 @@
 ﻿using iris_server.Models;
 using iris_server.Models.Interfaces;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
@@ -316,11 +317,15 @@ namespace iris_server.Services
         {
             try
             {
-                DateTime start = (DateTime)jsonDict["Start"];
-                DateTime end = (DateTime)jsonDict["End"];
+                DateTime start = DateTime.Parse((string)jsonDict["Start"]);
+                DateTime end;
+                bool endProvided = DateTime.TryParse((string)jsonDict["End"], out end);
+                if (!endProvided)
+                    end = start;
                 int repetition = (int)(long)jsonDict["Repeat"];
                 string description = (string)jsonDict["Description"];
-                List<string> reminders = (List<string>)jsonDict["Reminders"];
+                JArray jArr = (JArray)jsonDict["Reminders"];
+                List<string> reminders = jArr.ToObject<List<string>>();
                 Patient patient = (Patient)await GetEntityByPrimaryKey(ctx, patientId, Collection.patients);
                 CalendarEntry entry = new CalendarEntry() { Description = description, End = end, Start = start, Repeat = (CalendarEntry.Repetition)repetition, Reminders = reminders };
                 patient.CalendarEntries.Add(entry);
@@ -368,7 +373,8 @@ namespace iris_server.Services
                             changes = true;
                             break;
                         case "reminders":
-                            List<string> reminders = (List<string>)jsonDict["Reminders"];
+                            JArray jArr = (JArray)jsonDict["Reminders"];
+                            List<string> reminders = jArr.ToObject<List<string>>();
                             entry.Reminders = reminders;
                             changes = true;
                             break;
