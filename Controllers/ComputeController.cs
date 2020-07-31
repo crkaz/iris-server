@@ -4,6 +4,7 @@ using iris_server.Models;
 using Newtonsoft.Json.Linq;
 using iris_server.Services;
 using Microsoft.AspNetCore.Authorization;
+using System.Collections.Generic;
 
 namespace iris_server.Controllers
 {
@@ -11,6 +12,21 @@ namespace iris_server.Controllers
     {
         /// Constructor injects the user context using dependency injection, via the BaseController. 
         public ComputeController(DbCtx context) : base(context) { }
+
+
+        // Amalyses a collection of transforms (position and rotation) and returns a dictionary of functionalities and results (e.g. "falldetection": true").
+        public IDictionary<string, object> AnalyseMovement([FromHeader(Name = "ApiKey")] string apiKey, [FromBody] JObject transformsJson)
+        {
+            try
+            {
+                IDictionary<string, object> result = DetectionService.AnalyseMovement(transformsJson);
+                return result;
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
         // Analyse an image and return the predicted room and context aware prompt.
         // ..api/compute/detectroom
@@ -55,8 +71,9 @@ namespace iris_server.Controllers
         [Authorize(Roles = _roles.patient)]
         public bool DetectFall([FromHeader(Name = "ApiKey")] string apiKey, [FromBody] JObject transforms)
         {
-            bool result = DetectionService.DetectFall(transforms, null);
-            return result;
+            //bool result = DetectionService.DetectFall(transforms);
+            //return result;
+            return true;
         }
     }
 }
