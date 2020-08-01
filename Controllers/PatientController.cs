@@ -27,9 +27,9 @@ namespace iris_server.Controllers
                 bool success = DbService.DeleteEntityByPrimaryKey(_ctx, patientId, DbService.Collection.patients).GetAwaiter().GetResult();
                 if (success)
                 {
-                    return Ok();
+                    return Ok("Deleted successfully.");
                 }
-                return BadRequest();
+                return NotFound("Patient not found.");
             }
             catch (Exception e)
             {

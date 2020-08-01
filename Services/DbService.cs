@@ -317,15 +317,14 @@ namespace iris_server.Services
         {
             try
             {
-                DateTime start = DateTime.Parse((string)jsonDict["Start"]);
-                DateTime end;
-                bool endProvided = DateTime.TryParse((string)jsonDict["End"], out end);
-                if (!endProvided)
-                    end = start;
+                DateTime start = (DateTime)jsonDict["Start"];
+                DateTime end = (DateTime)jsonDict["End"];
                 int repetition = (int)(long)jsonDict["Repeat"];
                 string description = (string)jsonDict["Description"];
                 JArray jArr = (JArray)jsonDict["Reminders"];
-                List<string> reminders = jArr.ToObject<List<string>>();
+                List<string> reminders = null;
+                if (jArr != null)
+                    reminders = jArr.ToObject<List<string>>();
                 Patient patient = (Patient)await GetEntityByPrimaryKey(ctx, patientId, Collection.patients);
                 CalendarEntry entry = new CalendarEntry() { Description = description, End = end, Start = start, Repeat = (CalendarEntry.Repetition)repetition, Reminders = reminders };
                 patient.CalendarEntries.Add(entry);
@@ -369,14 +368,20 @@ namespace iris_server.Services
                             break;
                         case "description":
                             string description = (string)jsonDict["Description"];
-                            entry.Description = description;
-                            changes = true;
+                            if (description != null)
+                            {
+                                entry.Description = description;
+                                changes = true;
+                            }
                             break;
                         case "reminders":
                             JArray jArr = (JArray)jsonDict["Reminders"];
-                            List<string> reminders = jArr.ToObject<List<string>>();
-                            entry.Reminders = reminders;
-                            changes = true;
+                            if (jArr != null)
+                            {
+                                List<string> reminders = jArr.ToObject<List<string>>();
+                                entry.Reminders = reminders;
+                                changes = true;
+                            }
                             break;
                     }
                 }

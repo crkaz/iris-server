@@ -137,20 +137,23 @@ namespace XUnitTests
         /// Test response for a request to DELETE a non-existent patient.
         /// </summary>
         [Fact]
-        public async Task DeletePatientsUnauthorised_NoPatient()
+        public async Task DeletePatientsNotFound_NoPatient()
         {
             // arrange
             TestClient testClient = new TestClient();
             const string endpoint = "patient/delete/?id=doesnotexist123";
-            const HttpStatusCode expectedStatusCode = HttpStatusCode.Unauthorized;
+            const string expectedResponse = "Patient not found.";
+            const HttpStatusCode expectedStatusCode = HttpStatusCode.NotFound;
             testClient.AddHeader("ApiKey", "testcarer");
 
             // act
             HttpResponseMessage response = await testClient.DeleteRequest(endpoint);
+            string actualResponse = await response.Content.ReadAsStringAsync();
             HttpStatusCode actualStatusCode = response.StatusCode;
 
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
+            Assert.Equal(expectedResponse, actualResponse);
         }
 
         /// <summary>
