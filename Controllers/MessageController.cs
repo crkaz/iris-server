@@ -42,7 +42,7 @@ namespace iris_server.Controllers
 
 
         // Get a patients unread messages.
-        // ..api/message/get?id=
+        // ..api/message/get
         [Authorize(Roles = _roles.patient)]
         public IActionResult Get([FromHeader(Name = "ApiKey")] string apiKey)
         {
@@ -52,6 +52,30 @@ namespace iris_server.Controllers
                 // Get unread messages.
                 IEnumerable<PatientMessage> unreadMessages = patient.Messages.Where(message => message.Read == null);
                 return Ok(unreadMessages);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
+
+
+        // Update the 'read' date of a message. A GET request is used because no data is transmitted.
+        // ..api/message/read?id=
+        [HttpGet]
+        [Authorize(Roles = _roles.patient)]
+        public IActionResult Read([FromHeader(Name = "ApiKey")] string apiKey, [FromQuery(Name = "id")] string messageId)
+        {
+            try
+            {
+                PatientMessage message = _ctx.Messages.Find(messageId);
+                if (message != null)
+                {
+                    message.Read = DateTime.Now;
+                    _ctx.SaveChanges();
+                    return Ok();
+                }
+                return NotFound();
             }
             catch (Exception e)
             {
