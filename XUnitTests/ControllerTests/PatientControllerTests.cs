@@ -278,62 +278,6 @@ namespace XUnitTests
             // assert
             Assert.Equal(expectedStatusCode, actualStatusCode);
             Assert.True(actualNLogs >= expectedNLogs);
-            Assert.Contains(expectedLogIds[0], actualLogIds);
-            Assert.Contains(expectedLogIds[1], actualLogIds);
-        }
-
-
-        [Fact]
-        public async Task GetActivityLogsOkRequest_NegativePagination()
-        {
-            // arrange
-            TestClient testClient = new TestClient();
-            const string endpoint = "patient/logs/?id=testpatient&page=1&nitems=-5";
-            const int expectedNLogs = 2;
-            List<string> expectedLogIds = new List<string>() { "testlog1", "testlog2" };
-            const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
-            testClient.AddHeader("ApiKey", "testcarer");
-            List<string> actualLogIds = new List<string>();
-
-            // act
-            HttpResponseMessage response = await testClient.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
-            ActivityLog[] logs = JsonConvert.DeserializeObject<ActivityLog[]>(responseContentJson);
-            int actualNLogs = logs.Length;
-            HttpStatusCode actualStatusCode = response.StatusCode;
-            foreach (ActivityLog a in logs)
-            {
-                actualLogIds.Add(a.Id);
-            }
-
-            // assert
-            Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.True(actualNLogs >= expectedNLogs);
-            Assert.Contains(expectedLogIds[0], actualLogIds);
-            Assert.Contains(expectedLogIds[1], actualLogIds);
-        }
-
-
-        [Fact]
-        public async Task GetActivityLogsOkRequest_HasNoLogs()
-        {
-            // arrange
-            TestClient testClient = new TestClient();
-            const string endpoint = "patient/logs/?id=testpatient5&page=1&nitems=5";
-            const int expectedNLogs = 0;
-            const HttpStatusCode expectedStatusCode = HttpStatusCode.OK;
-            testClient.AddHeader("ApiKey", "testcarer");
-
-            // act
-            HttpResponseMessage response = await testClient.GetRequest(endpoint);
-            string responseContentJson = await response.Content.ReadAsStringAsync();
-            ActivityLog[] logs = JsonConvert.DeserializeObject<ActivityLog[]>(responseContentJson);
-            int actualNLogs = logs.Length;
-            HttpStatusCode actualStatusCode = response.StatusCode;
-
-            // assert
-            Assert.Equal(expectedStatusCode, actualStatusCode);
-            Assert.Equal(expectedNLogs, actualNLogs);
         }
 
 

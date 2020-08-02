@@ -1,7 +1,4 @@
 ﻿using iris_server.Models;
-using iris_server.Models.Interfaces;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing.Patterns;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -11,32 +8,25 @@ using System.Threading.Tasks;
 
 namespace iris_server.Services
 {
+    /// <summary>
+    /// Methods dedicated to detection and analysis logic (e.g. fall, room, image) for use
+    /// by the compute controller.
+    /// </summary>
     public static class DetectionService
     {
-        //private static async void AnalyseImage(byte[] imageBytes)
-        //{
-        //    var response = await AzureVisionService.Analyse(imageBytes);
-        //}
-
         public static IDictionary<string, object> AnalyseMovement(JObject transformsJson)
         {
             IDictionary<string, object> analysis = new Dictionary<string, object>();
-
-            List<float> xPosTransforms = transformsJson["xPos"].ToObject<List<float>>();
-            List<float> yPosTransforms = transformsJson["yPos"].ToObject<List<float>>();
-            List<float> zPosTransforms = transformsJson["zPos"].ToObject<List<float>>();
-            List<float> xRotTransforms = transformsJson["xRot"].ToObject<List<float>>();
-            List<float> yRotTransforms = transformsJson["yRot"].ToObject<List<float>>();
-            List<float> zRotTransforms = transformsJson["zRot"].ToObject<List<float>>();
-
-            // Detect falls with ypos and add result (true/false) to return.
-            analysis.Add("falldetection", DetectFalls(yPosTransforms));
+            analysis.Add("falldetection", DetectFalls(transformsJson));
+            analysis.Add("movementdetection", DetectMovement(transformsJson));
+            analysis.Add("confusiondetection", DetectConfusion(transformsJson));
 
             return analysis;
         }
 
-        private static bool DetectFalls(IList<float> yTransforms)
+        private static bool DetectFalls(JObject transformsJson)
         {
+            List<float> yTransforms = transformsJson["yPos"].ToObject<List<float>>();
             const double THRESHOLD_VELOCITY = 0.3; // TODO: Get from config.
             IList<float> d1 = CalculateFirstDerivative(yTransforms);
             double maxChange = d1.Max();
@@ -48,68 +38,54 @@ namespace iris_server.Services
             return false;
         }
 
-        public static bool DetectFall(JArray transformsJson)
-        {
-            //List<double> transforms = transformsJson.ToObject<List<double>>();
-            //const double THRESHOLD_VELOCITY = 0.5; // TODO: Get from config.
-            ////List<double> d2 = CalculateFirstDerivative(CalculateFirstDerivative(transforms));
-            ////double maxChange = d2.Max();
-            //List<double> d1 = CalculateFirstDerivative(transforms);
-            //double maxChange = d1.Max();
-            //if (maxChange >= THRESHOLD_VELOCITY)
-            //{
-            //    // TODO: then check if there was a recovery.
-            //    return true;
-            //}
-            return false;
-        }
-
-
-        private static IList<float> CalculateFirstDerivative(IList<float> transforms)
-        {
-            IList<float> d1 = new List<float>();
-            for (int i = 1; i < transforms.Count - 1; ++i)
-            {
-                d1.Add(transforms[i - 1] - transforms[i]);
-            }
-            return d1;
-        }
-
-
 
         public static bool DetectConfusion(JObject transformsJson)
         {
-            //const double THRESHOLD_DISTANCE = 0.2; // TODO: Get from config.
-            //const double THRESHOLD_VERTICAL_ROTATION = 0.2; // TODO: Get from config.
-            //const double THRESHOLD_HORIZONTAL_ROTATION = 0.2; // TODO: Get from config.
+            // TODO: INCOMPLETE IMPLEMENTATION
+            // Looks for little-no head movement.
+            const float ROT_THRESHOLD = 0.03f; // TODO: Get from config.
+            const float POS_THRESHOLD = 0.03f; // TODO: Get from config.
 
-            //double rotationX;
-            //double rotationY;
-            //double distance;
+            List<float> xTransforms = transformsJson["xPos"].ToObject<List<float>>();
+            List<float> yTransforms = transformsJson["yPos"].ToObject<List<float>>();
+            List<float> zTransforms = transformsJson["zPos"].ToObject<List<float>>();
+            List<float> xRot = transformsJson["xRot"].ToObject<List<float>>();
+            List<float> yRot = transformsJson["yRot"].ToObject<List<float>>();
+            List<float> zRot = transformsJson["zRot"].ToObject<List<float>>();
 
-            //// List of {posx,posy,posz,rotx,roty,rotz}
-            //var transforms = JObject.FromObject(transformsJson).ToObject<Dictionary<string, object>>();
+            float pos = xTransforms.Sum() + yTransforms.Sum() + zTransforms.Sum();
+            float rot = xRot.Sum() + yRot.Sum() + zRot.Sum();
 
-            //foreach (var transform in transforms)
-            //{
-
-            //}
-            //double avgVerticalVelocity = avgVerticalVelocity = transforms.Average();
-
-            //if (avgVerticalVelocity > THRESHOLD_VELOCITY)
-            //{
-            //    return true;
-            //}
-
+            if (pos <= POS_THRESHOLD && rot < ROT_THRESHOLD)
+            {
+                return true; // Should detectconfusion();
+            }
             return false;
         }
 
+        public static bool DetectMovement(JObject transformsJson)
+        {
+            // Checks if the user has moved at least n metres.
+            const float DISTANCE_THRESHOLD = 1.5f; // 1.5m 
+            List<float> xTransforms = transformsJson["xPos"].ToObject<List<float>>();
+            List<float> yTransforms = transformsJson["yPos"].ToObject<List<float>>();
+            List<float> zTransforms = transformsJson["zPos"].ToObject<List<float>>();
+            System.Numerics.Vector3 pos = new System.Numerics.Vector3(xTransforms.Sum(), yTransforms.Sum(), zTransforms.Sum());
+            if (pos.Length() >= DISTANCE_THRESHOLD)
+            {
+                return true; // Should detectroom().
+            }
+            return false;
+
+
+        }
 
         public static async Task<string> DetectRoom(byte[] imageBytes)
         {
             // TODO: implement machine learning for decision making (i.e. room classification).
             try
             {
+                // Rooms of interest. TODO: // context sensitive prompts from config
                 List<string> roomTags = new List<string>() { "kitchen", "bedroom", "bathroom", "living room", "hallway" };
 
                 var response = await AzureVisionService.Analyse(imageBytes);
@@ -131,6 +107,17 @@ namespace iris_server.Services
                 Console.WriteLine(e);
                 return "unknown";
             }
+        }
+
+
+        private static IList<float> CalculateFirstDerivative(IList<float> transforms)
+        {
+            IList<float> d1 = new List<float>();
+            for (int i = 1; i < transforms.Count - 1; ++i)
+            {
+                d1.Add(transforms[i - 1] - transforms[i]);
+            }
+            return d1;
         }
     }
 }

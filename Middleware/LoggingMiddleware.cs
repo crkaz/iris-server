@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using System;
-using iris_server.Services;
 
 namespace iris_server.Middleware
 {

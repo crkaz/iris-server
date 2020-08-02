@@ -1,17 +1,17 @@
 ﻿using iris_server.Models;
 using iris_server.Models.Interfaces;
-using Microsoft.AspNetCore.DataProtection.XmlEncryption;
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace iris_server.Services
 {
+    /// <summary>
+    /// Methods pertaining to database access.
+    /// TODO: split into  smaller access groups for readability.
+    /// </summary>
     public static class DbService
     {
         public enum Collection { users, patients, carers, calendars, activitylogs, stickies };
