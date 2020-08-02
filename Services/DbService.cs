@@ -1,5 +1,7 @@
 ﻿using iris_server.Models;
 using iris_server.Models.Interfaces;
+using Microsoft.AspNetCore.DataProtection.XmlEncryption;
+using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -317,14 +319,25 @@ namespace iris_server.Services
         {
             try
             {
-                DateTime start = (DateTime)jsonDict["Start"];
-                DateTime end = (DateTime)jsonDict["End"];
+                DateTime start;
+                DateTime end;
+                try
+                {
+                    // DateTime in string format.
+                    start = DateTime.Parse((string)jsonDict["Start"]);
+                    bool endProvided = DateTime.TryParse((string)jsonDict["End"], out end);
+                    if (!endProvided)
+                        end = start;
+                }
+                catch
+                {
+                    // DateTime object.
+                    start = (DateTime)jsonDict["Start"];
+                    end = (DateTime)jsonDict["End"];
+                }
                 int repetition = (int)(long)jsonDict["Repeat"];
                 string description = (string)jsonDict["Description"];
-                JArray jArr = (JArray)jsonDict["Reminders"];
-                List<string> reminders = null;
-                if (jArr != null)
-                    reminders = jArr.ToObject<List<string>>();
+                string reminders = (string)jsonDict["Reminders"];
                 Patient patient = (Patient)await GetEntityByPrimaryKey(ctx, patientId, Collection.patients);
                 CalendarEntry entry = new CalendarEntry() { Description = description, End = end, Start = start, Repeat = (CalendarEntry.Repetition)repetition, Reminders = reminders };
                 patient.CalendarEntries.Add(entry);
@@ -352,12 +365,32 @@ namespace iris_server.Services
                     switch (key.ToLower())
                     {
                         case "start":
-                            DateTime start = (DateTime)jsonDict["Start"];
+                            DateTime start;
+                            try
+                            {
+                                // DateTime in string format.
+                                start = DateTime.Parse((string)jsonDict["Start"]);
+                            }
+                            catch
+                            {
+                                // DateTime object.
+                                start = (DateTime)jsonDict["Start"];
+                            }
                             entry.Start = start;
                             changes = true;
                             break;
                         case "end":
-                            DateTime end = (DateTime)jsonDict["End"];
+                            DateTime end;
+                            try
+                            {
+                                // DateTime in string format.
+                                end = DateTime.Parse((string)jsonDict["End"]);
+                            }
+                            catch
+                            {
+                                // DateTime object.
+                                end = (DateTime)jsonDict["End"];
+                            }
                             entry.End = end;
                             changes = true;
                             break;
@@ -368,20 +401,13 @@ namespace iris_server.Services
                             break;
                         case "description":
                             string description = (string)jsonDict["Description"];
-                            if (description != null)
-                            {
-                                entry.Description = description;
-                                changes = true;
-                            }
+                            entry.Description = description;
+                            changes = true;
                             break;
                         case "reminders":
-                            JArray jArr = (JArray)jsonDict["Reminders"];
-                            if (jArr != null)
-                            {
-                                List<string> reminders = jArr.ToObject<List<string>>();
-                                entry.Reminders = reminders;
-                                changes = true;
-                            }
+                            string reminders = (string)jsonDict["Reminders"];
+                            entry.Reminders = reminders;
+                            changes = true;
                             break;
                     }
                 }
@@ -517,7 +543,7 @@ namespace iris_server.Services
                     // Assign the patient to the carer if they are not assigned.
                     if (!patientAlreadyAssigned)
                     {
-                        carer.AssignedPatientIds.Add(patientId);
+                        carer.AssignedPatientIds += "," + patientId;
                         await ctx.SaveChangesAsync();
                     }
                 }
@@ -527,7 +553,13 @@ namespace iris_server.Services
                     if (patientAlreadyAssigned)
                     {
                         if (patientId != "testpatient") // Don't remove test record.
-                            carer.AssignedPatientIds.Remove(patientId);
+                        {
+                            // Awkward string ops because efcore doesn't allow for simply storing lists of strings.
+                            carer.AssignedPatientIds = carer.AssignedPatientIds.Replace(patientId, "");
+                            carer.AssignedPatientIds = carer.AssignedPatientIds.Replace(",,", ""); // Remove any residual comma pairs.
+                            carer.AssignedPatientIds = carer.AssignedPatientIds.TrimEnd(','); // Remove end comma if no value follows.
+                            carer.AssignedPatientIds = carer.AssignedPatientIds.TrimStart(','); // Remove start comma if no value follows.
+                        }
                         await ctx.SaveChangesAsync();
                     }
                 }
@@ -634,8 +666,9 @@ namespace iris_server.Services
             try
             {
                 Carer carer = (Carer)await GetEntityByPrimaryKey(ctx, carerApiKey, Collection.carers);
+                List<string> assignedPatients = carer.AssignedPatientIds.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
                 List<object> patients = new List<object>();
-                foreach (string patientId in carer.AssignedPatientIds)
+                foreach (string patientId in assignedPatients)
                 {
                     Patient p = (Patient)await GetEntityByPrimaryKey(ctx, patientId, Collection.patients);
                     bool logsExist = p.ActivityLogs.Count > 0;

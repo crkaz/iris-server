@@ -23,8 +23,24 @@ namespace iris_server.Controllers
             try
             {
                 var jsonDict = JObject.FromObject(calendarJson).ToObject<Dictionary<string, object>>();
-                DateTime start = (DateTime)jsonDict["Start"];
-                DateTime end = (DateTime)jsonDict["End"];
+
+                DateTime start;
+                DateTime end;
+
+                try
+                {
+                    // Datetime object.
+                    start = (DateTime)jsonDict["Start"];
+                    end = (DateTime)jsonDict["End"];
+                }
+                catch
+                {
+                    // String representation of datetime.
+                    start = DateTime.Parse((string)jsonDict["Start"]);
+                    bool endProvided = DateTime.TryParse((string)jsonDict["End"], out end);
+                    if (!endProvided)
+                        end = start;
+                }
 
                 bool validEntry = (start > DateTime.Now && start <= end);
                 if (validEntry)
@@ -64,8 +80,24 @@ namespace iris_server.Controllers
                     if (carerAssignedToPatient)
                     {
                         var jsonDict = JObject.FromObject(calendarJson).ToObject<Dictionary<string, object>>();
-                        DateTime start = (DateTime)jsonDict["Start"];
-                        DateTime end = (DateTime)jsonDict["End"];
+
+                        DateTime start;
+                        DateTime end;
+
+                        try
+                        {
+                            // Datetime object.
+                            start = (DateTime)jsonDict["Start"];
+                            end = (DateTime)jsonDict["End"];
+                        }
+                        catch
+                        {
+                            // String representation of datetime.
+                            start = DateTime.Parse((string)jsonDict["Start"]);
+                            bool endProvided = DateTime.TryParse((string)jsonDict["End"], out end);
+                            if (!endProvided)
+                                end = start;
+                        }
 
                         bool validEntry = (start > DateTime.Now && start <= end);
                         if (validEntry)
@@ -124,7 +156,7 @@ namespace iris_server.Controllers
 
 
         // Get all future calender entries for a patient between todays date.
-        // ..api/patient/calendar?id=..&date=
+        // ..api/patient/calendar/carerget/?id=..&date=
         [HttpGet]
         [Authorize(Roles = _roles.carer)]
         public IActionResult CarerGet([FromHeader(Name = "ApiKey")] string carerApiKey, [FromQuery(Name = "id")] string patientId, [FromQuery(Name = "page")] string page, [FromQuery(Name = "nitems")] string nItems)
@@ -149,7 +181,7 @@ namespace iris_server.Controllers
 
 
         // Get all calender entries from 'today' and 'tomorrow'.
-        // ..api/patient/calendar?id=..&date=
+        // ..api/patient/calendar/patientget/?id=..&date=
         [HttpGet]
         [Authorize(Roles = _roles.patient)]
         public IActionResult PatientGet([FromHeader(Name = "ApiKey")] string patientApiKey)

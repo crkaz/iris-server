@@ -148,7 +148,8 @@ namespace iris_server.Controllers
 
                 if (carer != null && patient != null)
                 {
-                    bool canAssign = (carer.User.Role != "informalcarer" || carer.AssignedPatientIds.Count == 0);
+                    List<string> assignedPatients = carer.AssignedPatientIds.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+                    bool canAssign = (carer.User.Role != "informalcarer" || assignedPatients.Count == 0);
                     if (canAssign)
                     {
                         bool success = DbService.AllocatePatient(_ctx, patientAndCarerId).GetAwaiter().GetResult();

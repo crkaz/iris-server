@@ -34,30 +34,9 @@ namespace iris_server.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            #region Converters
-            // Cannot store complex types in database. These converters managage the conversion to and from.
-
-            var stringArrayConverter = new ValueConverter<List<string>, string>(
-                v => v.ToString(),
-                v => v.Split(',', StringSplitOptions.None).ToList());
-
             ValueConverter featuresConverter = new ValueConverter<IList<IFeature>, string>(
                  v => JsonConvert.SerializeObject(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }),
                  v => JsonConvert.DeserializeObject<IList<IFeature>>(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
-
-            #endregion
-
-            // Assigned patient ids in carer model.
-            modelBuilder
-                .Entity<Carer>()
-                .Property(e => e.AssignedPatientIds)
-                .HasConversion(stringArrayConverter);
-
-            //  Reminders in calendar model.
-            modelBuilder
-                .Entity<CalendarEntry>()
-                .Property(e => e.Reminders)
-                .HasConversion(stringArrayConverter);
 
             // Features in patientconfig model.
             modelBuilder

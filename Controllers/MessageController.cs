@@ -50,7 +50,7 @@ namespace iris_server.Controllers
             {
                 Patient patient = (Patient)DbService.GetEntityByForeignKey(_ctx, apiKey, DbService.Collection.patients);
                 // Get unread messages.
-                IEnumerable<PatientMessage> unreadMessages = patient.Messages.Where(message => message.Read == null);
+                IEnumerable<PatientMessage> unreadMessages = patient.Messages.Where(message => message.Read == null).OrderBy(msg => msg.Sent);
                 return Ok(unreadMessages);
             }
             catch (Exception e)
