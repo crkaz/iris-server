@@ -5,6 +5,8 @@ using Newtonsoft.Json.Linq;
 using iris_server.Services;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
+using iris_server.Extensions;
+using System.Threading.Tasks;
 
 namespace iris_server.Controllers
 {
@@ -28,15 +30,36 @@ namespace iris_server.Controllers
             }
         }
 
-        // Analyse an image and return the predicted room and context aware prompt.
-        // ..api/compute/detectroom
+
+        // Analyse an image and return the json response.
+        // ..api/compute/analyseimage
         [HttpPost]
-        // [Authorize(Roles = "Patient")]
-        public IActionResult DetectRoom([FromHeader(Name = "ApiKey")] string apiKey)
+        [Authorize(Roles = "patient")]
+        public async Task<IActionResult> AnalyseImage([FromHeader(Name = "ApiKey")] string apiKey)
         {
             try
             {
-                return Ok();
+                byte[] imageBytes = await Request.GetRawBodyBytesAsync();
+                var response = await AzureVisionService.Analyse(imageBytes);
+                return Ok(response);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
+
+        // Analyse an image and return the predicted room and context aware prompt.
+        // ..api/compute/detectroom
+        [HttpPost]
+        [Authorize(Roles = "patient")]
+        public async Task<IActionResult> DetectRoom([FromHeader(Name = "ApiKey")] string apiKey)
+        {
+            try
+            {
+                byte[] imageBytes = await Request.GetRawBodyBytesAsync();
+                var response = await DetectionService.DetectRoom(imageBytes);
+                return Ok(response);
             }
             catch (Exception e)
             {

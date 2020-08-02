@@ -1,13 +1,23 @@
 ﻿using iris_server.Models;
 using iris_server.Models.Interfaces;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing.Patterns;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace iris_server.Services
 {
     public static class DetectionService
     {
+        //private static async void AnalyseImage(byte[] imageBytes)
+        //{
+        //    var response = await AzureVisionService.Analyse(imageBytes);
+        //}
+
         public static IDictionary<string, object> AnalyseMovement(JObject transformsJson)
         {
             IDictionary<string, object> analysis = new Dictionary<string, object>();
@@ -19,7 +29,7 @@ namespace iris_server.Services
             List<float> yRotTransforms = transformsJson["yRot"].ToObject<List<float>>();
             List<float> zRotTransforms = transformsJson["zRot"].ToObject<List<float>>();
 
-            // Detect falls with ypos
+            // Detect falls with ypos and add result (true/false) to return.
             analysis.Add("falldetection", DetectFalls(yPosTransforms));
 
             return analysis;
@@ -27,7 +37,7 @@ namespace iris_server.Services
 
         private static bool DetectFalls(IList<float> yTransforms)
         {
-            const double THRESHOLD_VELOCITY = -0.5; // TODO: Get from config.
+            const double THRESHOLD_VELOCITY = 0.3; // TODO: Get from config.
             IList<float> d1 = CalculateFirstDerivative(yTransforms);
             double maxChange = d1.Max();
             if (maxChange >= THRESHOLD_VELOCITY)
@@ -95,10 +105,32 @@ namespace iris_server.Services
         }
 
 
-        public static bool DetectRoom(JObject transforms)
+        public static async Task<string> DetectRoom(byte[] imageBytes)
         {
-            // TODO: Fall detection logic.
-            return true;
+            // TODO: implement machine learning for decision making (i.e. room classification).
+            try
+            {
+                List<string> roomTags = new List<string>() { "kitchen", "bedroom", "bathroom", "living room", "hallway" };
+
+                var response = await AzureVisionService.Analyse(imageBytes);
+                VisionTags tags = JsonConvert.DeserializeObject<VisionTags>(response);
+
+                VisionTags.TagData detectedRoom = new VisionTags.TagData() { name = "unknown", confidence = 0.0f };
+                foreach (var tag in tags.description.tags)
+                {
+                    if (roomTags.Contains(tag.ToLower()))
+                    {
+                        detectedRoom.name = tag;
+                    }
+                }
+
+                return detectedRoom.name;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return "unknown";
+            }
         }
     }
 }
