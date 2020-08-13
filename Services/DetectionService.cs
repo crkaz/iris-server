@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace iris_server.Services
@@ -16,19 +17,28 @@ namespace iris_server.Services
     {
         public static IDictionary<string, object> AnalyseMovement(JObject transformsJson)
         {
+            const string FALL_DETECTION_KEY = "falldetection";
+            const string ROOM_DETECTION_KEY = "movementdetection";
+            const string CONFUSION_DETECTION_KEY = "confusiondetection";
+
             IDictionary<string, object> analysis = new Dictionary<string, object>();
-            analysis.Add("falldetection", DetectFalls(transformsJson));
-            analysis.Add("movementdetection", DetectMovement(transformsJson));
-            analysis.Add("confusiondetection", DetectConfusion(transformsJson));
+            analysis.Add(FALL_DETECTION_KEY, DetectFalls(transformsJson));
+            analysis.Add(ROOM_DETECTION_KEY, DetectMovement(transformsJson));
+            analysis.Add(CONFUSION_DETECTION_KEY, DetectConfusion(transformsJson));
 
             return analysis;
         }
+
 
         private static bool DetectFalls(JObject transformsJson)
         {
             List<float> yTransforms = transformsJson["yPos"].ToObject<List<float>>();
             const double THRESHOLD_VELOCITY = 0.3; // TODO: Get from config.
+
+            // Get the first derivate of the transforms.
             IList<float> d1 = CalculateFirstDerivative(yTransforms);
+
+            // Compare the max value from the derivative to the threshold.
             double maxChange = d1.Max();
             if (maxChange >= THRESHOLD_VELOCITY)
             {
@@ -41,36 +51,53 @@ namespace iris_server.Services
 
         public static bool DetectConfusion(JObject transformsJson)
         {
-            // TODO: INCOMPLETE IMPLEMENTATION
-            // Looks for little-no head movement.
-            const float ROT_THRESHOLD = 0.03f; // TODO: Get from config.
-            const float POS_THRESHOLD = 0.03f; // TODO: Get from config.
+            /// TODO: INCOMPLETE IMPLEMENTATION
 
-            List<float> xTransforms = transformsJson["xPos"].ToObject<List<float>>();
-            List<float> yTransforms = transformsJson["yPos"].ToObject<List<float>>();
-            List<float> zTransforms = transformsJson["zPos"].ToObject<List<float>>();
+            // Looks for little-no head movement.
+            const float WINDOW_SIZE = 10.0f; // TODO: Confirm.
+            const float ROT_THRESHOLD = 0.03f; // TODO: Get from config.
+            const float POS_THRESHOLD = 0.3f; // TODO: Get from config.
+
+            // Get transforms from json.
+            List<float> xPos = transformsJson["xPos"].ToObject<List<float>>();
+            List<float> yPos = transformsJson["yPos"].ToObject<List<float>>();
+            List<float> zPos = transformsJson["zPos"].ToObject<List<float>>();
             List<float> xRot = transformsJson["xRot"].ToObject<List<float>>();
             List<float> yRot = transformsJson["yRot"].ToObject<List<float>>();
             List<float> zRot = transformsJson["zRot"].ToObject<List<float>>();
 
-            float pos = xTransforms.Sum() + yTransforms.Sum() + zTransforms.Sum();
-            float rot = xRot.Sum() + yRot.Sum() + zRot.Sum();
+            // Sum transforms in vector form.
+            Vector3 pos = new Vector3(xPos.Sum(), yPos.Sum(), zPos.Sum());
+            Vector3 rot = new Vector3(xRot.Sum(), yRot.Sum(), zRot.Sum());
 
-            if (pos <= POS_THRESHOLD && rot < ROT_THRESHOLD)
+            // TODO:
+            // 1. Split transforms into groups (e.g. 2 windows of 5 sec)
+            // 2. Check if magnitudes change between the windows
+            // 3. If not, detect confusion.
+
+            // Compare vector magnitudes with thresholds.
+            if (pos.Length() <= POS_THRESHOLD && rot.Length() < ROT_THRESHOLD)
             {
                 return true; // Should detectconfusion();
             }
             return false;
         }
 
+
         public static bool DetectMovement(JObject transformsJson)
         {
             // Checks if the user has moved at least n metres.
             const float DISTANCE_THRESHOLD = 1.5f; // 1.5m 
+
+            // Get transforms from json.
             List<float> xTransforms = transformsJson["xPos"].ToObject<List<float>>();
             List<float> yTransforms = transformsJson["yPos"].ToObject<List<float>>();
             List<float> zTransforms = transformsJson["zPos"].ToObject<List<float>>();
-            System.Numerics.Vector3 pos = new System.Numerics.Vector3(xTransforms.Sum(), yTransforms.Sum(), zTransforms.Sum());
+
+            // Sum transforms in vector form.
+            Vector3 pos = new Vector3(xTransforms.Sum(), yTransforms.Sum(), zTransforms.Sum());
+
+            // Compare vector magnitude with thresholds.
             if (pos.Length() >= DISTANCE_THRESHOLD)
             {
                 return true; // Should detectroom().
@@ -79,6 +106,7 @@ namespace iris_server.Services
 
 
         }
+
 
         public static async Task<string> DetectRoom(byte[] imageBytes)
         {
